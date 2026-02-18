@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, UserProfile } from '@ihss/shared-types';
+import { User, UserProfile } from '../shared/types';
 import { apiClient } from '../services/apiClient';
 
 interface AuthState {

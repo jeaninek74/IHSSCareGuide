@@ -3,7 +3,7 @@ import { Chip, Tooltip } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import { apiClient } from '../services/apiClient';
-import { HealthResponse } from '@ihss/shared-types';
+import { HealthResponse } from '../shared/types';
 
 const ApiStatus = () => {
   const [status, setStatus] = useState<'checking' | 'ok' | 'error'>('checking');

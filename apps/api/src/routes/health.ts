@@ -1,6 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import { prisma } from '../utils/prisma';
-import { HealthResponse } from '@ihss/shared-types';
+import { HealthResponse } from '../shared/types';
 
 const APP_VERSION = process.env.npm_package_version || '1.0.0';
 const APP_ENV = process.env.APP_ENV || 'development';

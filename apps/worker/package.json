@@ -9,8 +9,6 @@
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
-    "@ihss/shared-types": "*",
-    "@ihss/prompts": "*",
     "@prisma/client": "^5.8.0",
     "openai": "^4.26.0",
     "pino": "^8.17.0"

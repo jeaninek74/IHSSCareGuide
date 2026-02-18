@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../utils/prisma';
 import { authMiddleware } from '../middleware/auth';
-import { ApiError } from '@ihss/shared-types';
+import { ApiError } from '../shared/types';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'change-me-in-production';
 const JWT_EXPIRES_IN = '7d';
