@@ -1,23 +1,148 @@
-import axios from 'axios';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {}),
+    },
+  });
 
-export const apiClient = axios.create({
-  baseURL: BASE_URL,
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+  const data = await res.json();
 
-// Response interceptor for consistent error handling
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Redirect to login if session expired
-      window.location.href = '/login';
-    }
-    return Promise.reject(error);
+  if (!res.ok) {
+    const message = data?.error?.message || `Request failed with status ${res.status}`;
+    throw new Error(message);
   }
-);
+
+  return data;
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+
+export interface UserProfile {
+  id: string;
+  userId: string;
+  name: string;
+  timezone: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  data: { user: User; profile: UserProfile };
+}
+
+export const authApi = {
+  register: (email: string, password: string, name: string, timezone?: string) =>
+    request<AuthResponse>('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify({ email, password, name, timezone }),
+    }),
+
+  login: (email: string, password: string) =>
+    request<AuthResponse>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+
+  logout: () =>
+    request<{ success: boolean }>('/auth/logout', { method: 'POST' }),
+
+  me: () =>
+    request<AuthResponse>('/auth/me'),
+};
+
+// ── Shifts ────────────────────────────────────────────────────────────────────
+
+export interface ShiftEvent {
+  id: string;
+  shiftId: string;
+  userId: string;
+  type: string;
+  description: string;
+  occurredAt: string;
+  createdAt: string;
+}
+
+export interface Shift {
+  id: string;
+  userId: string;
+  status: 'active' | 'completed';
+  startedAt: string;
+  endedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  events: ShiftEvent[];
+}
+
+export interface ShiftResponse {
+  success: boolean;
+  data: { shift: Shift };
+}
+
+export interface ShiftsResponse {
+  success: boolean;
+  data: { shifts: Shift[] };
+}
+
+export const shiftsApi = {
+  start: () =>
+    request<ShiftResponse>('/shifts/start', { method: 'POST' }),
+
+  end: (shiftId: string) =>
+    request<ShiftResponse>(`/shifts/${shiftId}/end`, { method: 'POST' }),
+
+  addEvent: (shiftId: string, type: string, description: string, occurredAt?: string) =>
+    request<{ success: boolean; data: { event: ShiftEvent } }>(`/shifts/${shiftId}/events`, {
+      method: 'POST',
+      body: JSON.stringify({ type, description, occurredAt }),
+    }),
+
+  getAll: () =>
+    request<ShiftsResponse>('/shifts'),
+
+  getActive: () =>
+    request<{ success: boolean; data: { shift: Shift | null } }>('/shifts/active'),
+
+  getOne: (shiftId: string) =>
+    request<ShiftResponse>(`/shifts/${shiftId}`),
+
+  getWeeklyRange: (weekStart: string, weekEnd: string) =>
+    request<ShiftsResponse>(`/shifts/weekly-range?weekStart=${weekStart}&weekEnd=${weekEnd}`),
+};
+
+// ── Incidents ─────────────────────────────────────────────────────────────────
+
+export interface Incident {
+  id: string;
+  userId: string;
+  description: string;
+  structuredJson: unknown | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const incidentsApi = {
+  create: (description: string) =>
+    request<{ success: boolean; data: { incident: Incident } }>('/incidents', {
+      method: 'POST',
+      body: JSON.stringify({ description }),
+    }),
+
+  getAll: () =>
+    request<{ success: boolean; data: { incidents: Incident[] } }>('/incidents'),
+
+  getOne: (incidentId: string) =>
+    request<{ success: boolean; data: { incident: Incident } }>(`/incidents/${incidentId}`),
+};

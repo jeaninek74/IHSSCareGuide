@@ -2,8 +2,14 @@ import { useEffect, useState } from 'react';
 import { Chip, Tooltip } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
-import { apiClient } from '../services/apiClient';
-import { HealthResponse } from '../shared/types';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+
+interface HealthResponse {
+  status: string;
+  database: string;
+  environment: string;
+  version: string;
+}
 
 const ApiStatus = () => {
   const [status, setStatus] = useState<'checking' | 'ok' | 'error'>('checking');
@@ -12,9 +18,10 @@ const ApiStatus = () => {
   useEffect(() => {
     const check = async () => {
       try {
-        const res = await apiClient.get<HealthResponse>('/health');
-        setInfo(res.data);
-        setStatus(res.data.database === 'connected' ? 'ok' : 'error');
+        const res = await fetch(`${BASE_URL}/health`, { credentials: 'include' });
+        const data: HealthResponse = await res.json();
+        setInfo(data);
+        setStatus(data.database === 'connected' ? 'ok' : 'error');
       } catch {
         setStatus('error');
       }

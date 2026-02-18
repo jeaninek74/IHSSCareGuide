@@ -5,6 +5,8 @@ import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { healthRoutes } from './routes/health';
 import { authRoutes } from './routes/auth';
+import { shiftRoutes } from './routes/shifts';
+import { incidentRoutes } from './routes/incidents';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './plugins/requestLogger';
 import { prisma } from './utils/prisma';
@@ -37,7 +39,13 @@ export const buildApp = async () => {
 
   // CORS
   await app.register(cors, {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      process.env.CORS_ORIGIN || 'http://localhost:3000',
+      'https://frontend-production-d2b2.up.railway.app',
+      'https://ihsscareguide.com',
+      'https://www.ihsscareguide.com',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
@@ -63,6 +71,8 @@ export const buildApp = async () => {
   // Routes
   await app.register(healthRoutes, { prefix: '/health' });
   await app.register(authRoutes, { prefix: '/auth' });
+  await app.register(shiftRoutes, { prefix: '/shifts' });
+  await app.register(incidentRoutes, { prefix: '/incidents' });
 
   return app;
 };

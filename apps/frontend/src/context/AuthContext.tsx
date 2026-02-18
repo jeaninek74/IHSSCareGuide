@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, UserProfile } from '../shared/types';
-import { apiClient } from '../services/apiClient';
+import { authApi, User, UserProfile } from '../services/apiClient';
 
 interface AuthState {
   user: User | null;
@@ -28,17 +27,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshUser = async () => {
     try {
-      const res = await apiClient.get('/auth/me');
-      if (res.data.success) {
-        setState({
-          user: res.data.data.user,
-          profile: res.data.data.profile,
-          isAuthenticated: true,
-          isLoading: false,
-        });
-      } else {
-        setState({ user: null, profile: null, isAuthenticated: false, isLoading: false });
-      }
+      const res = await authApi.me();
+      setState({
+        user: res.data.user,
+        profile: res.data.profile,
+        isAuthenticated: true,
+        isLoading: false,
+      });
     } catch {
       setState({ user: null, profile: null, isAuthenticated: false, isLoading: false });
     }
@@ -49,36 +44,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const res = await apiClient.post('/auth/login', { email, password });
-    if (res.data.success) {
-      setState({
-        user: res.data.data.user,
-        profile: res.data.data.profile,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } else {
-      throw new Error(res.data.error?.message || 'Login failed');
-    }
+    const res = await authApi.login(email, password);
+    setState({
+      user: res.data.user,
+      profile: res.data.profile,
+      isAuthenticated: true,
+      isLoading: false,
+    });
   };
 
   const logout = async () => {
-    await apiClient.post('/auth/logout');
+    await authApi.logout();
     setState({ user: null, profile: null, isAuthenticated: false, isLoading: false });
   };
 
   const register = async (email: string, password: string, name: string, timezone?: string) => {
-    const res = await apiClient.post('/auth/register', { email, password, name, timezone });
-    if (res.data.success) {
-      setState({
-        user: res.data.data.user,
-        profile: res.data.data.profile,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } else {
-      throw new Error(res.data.error?.message || 'Registration failed');
-    }
+    const res = await authApi.register(email, password, name, timezone);
+    setState({
+      user: res.data.user,
+      profile: res.data.profile,
+      isAuthenticated: true,
+      isLoading: false,
+    });
   };
 
   return (
