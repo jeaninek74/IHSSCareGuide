@@ -1,0 +1,142 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector")]
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  passwordHash String       @map("password_hash")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+  profile      UserProfile?
+  shifts       Shift[]
+  incidents    Incident[]
+  weeklyExports WeeklyExport[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id        String   @id @default(uuid())
+  userId    String   @unique @map("user_id")
+  name      String
+  timezone  String   @default("America/Los_Angeles")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model Shift {
+  id              String          @id @default(uuid())
+  userId          String          @map("user_id")
+  status          ShiftStatus     @default(active)
+  startedAt       DateTime        @default(now()) @map("started_at")
+  endedAt         DateTime?       @map("ended_at")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events          ShiftEvent[]
+  structuredNotes StructuredNote[]
+
+  @@index([userId])
+  @@map("shifts")
+}
+
+enum ShiftStatus {
+  active
+  completed
+}
+
+model ShiftEvent {
+  id          String   @id @default(uuid())
+  shiftId     String   @map("shift_id")
+  userId      String   @map("user_id")
+  type        String
+  description String
+  occurredAt  DateTime @default(now()) @map("occurred_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  shift       Shift    @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+
+  @@index([shiftId])
+  @@map("shift_events")
+}
+
+model StructuredNote {
+  id            String   @id @default(uuid())
+  shiftId       String   @map("shift_id")
+  userId        String   @map("user_id")
+  version       Int      @default(1)
+  isFinal       Boolean  @default(false) @map("is_final")
+  content       Json
+  modelUsed     String   @map("model_used")
+  promptVersion String   @map("prompt_version")
+  createdAt     DateTime @default(now()) @map("created_at")
+  shift         Shift    @relation(fields: [shiftId], references: [id], onDelete: Cascade)
+
+  @@map("structured_notes")
+}
+
+model WeeklyExport {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  weekStart DateTime @map("week_start")
+  weekEnd   DateTime @map("week_end")
+  content   Json
+  pdfPath   String?  @map("pdf_path")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("weekly_exports")
+}
+
+model Incident {
+  id             String   @id @default(uuid())
+  userId         String   @map("user_id")
+  description    String
+  structuredJson Json?    @map("structured_json")
+  modelUsed      String?  @map("model_used")
+  promptVersion  String?  @map("prompt_version")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("incidents")
+}
+
+model KnowledgeDocument {
+  id            String           @id @default(uuid())
+  title         String
+  source        String
+  jurisdiction  String?
+  effectiveDate DateTime?        @map("effective_date")
+  createdAt     DateTime         @default(now()) @map("created_at")
+  chunks        KnowledgeChunk[]
+
+  @@map("knowledge_documents")
+}
+
+model KnowledgeChunk {
+  id           String            @id @default(uuid())
+  documentId   String            @map("document_id")
+  title        String
+  source       String
+  content      String
+  chunkIndex   Int               @map("chunk_index")
+  /// @zod.custom(z.string()) stored as vector string
+  embedding    Unsupported("vector(1536)")?
+  createdAt    DateTime          @default(now()) @map("created_at")
+  document     KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+  @@map("knowledge_chunks")
+}
