@@ -1,4 +1,4 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
@@ -23,7 +23,7 @@ const loginSchema = z.object({
   password: z.string().min(1),
 });
 
-const setAuthCookie = (reply: Parameters<typeof authMiddleware>[0]['reply'], token: string) => {
+const setAuthCookie = (reply: FastifyReply, token: string) => {
   reply.setCookie(COOKIE_NAME, token, {
     httpOnly: true,
     secure: IS_PROD,
@@ -47,9 +47,7 @@ export const authRoutes = async (app: FastifyInstance) => {
         },
       } satisfies ApiError);
     }
-
     const { email, password, name, timezone } = parsed.data;
-
     const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       return reply.code(409).send({
@@ -61,9 +59,7 @@ export const authRoutes = async (app: FastifyInstance) => {
         },
       } satisfies ApiError);
     }
-
     const passwordHash = await bcrypt.hash(password, 12);
-
     const user = await prisma.user.create({
       data: {
         email,
@@ -74,10 +70,8 @@ export const authRoutes = async (app: FastifyInstance) => {
       },
       include: { profile: true },
     });
-
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
     setAuthCookie(reply, token);
-
     return reply.code(201).send({
       success: true,
       data: {
@@ -112,14 +106,11 @@ export const authRoutes = async (app: FastifyInstance) => {
         },
       } satisfies ApiError);
     }
-
     const { email, password } = parsed.data;
-
     const user = await prisma.user.findUnique({
       where: { email },
       include: { profile: true },
     });
-
     if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
       return reply.code(401).send({
         success: false,
@@ -130,10 +121,8 @@ export const authRoutes = async (app: FastifyInstance) => {
         },
       } satisfies ApiError);
     }
-
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
     setAuthCookie(reply, token);
-
     return reply.code(200).send({
       success: true,
       data: {
@@ -163,20 +152,17 @@ export const authRoutes = async (app: FastifyInstance) => {
 
   // GET /auth/me
   app.get('/me', { preHandler: [authMiddleware] }, async (request, reply) => {
-    const userId = (request as { userId?: string }).userId;
-
+    const userId = (request as unknown as { userId?: string }).userId;
     const user = await prisma.user.findUnique({
       where: { id: userId },
       include: { profile: true },
     });
-
     if (!user) {
       return reply.code(401).send({
         success: false,
         error: { code: 'UNAUTHORIZED', message: 'Not authenticated.', requestId: request.id },
       } satisfies ApiError);
     }
-
     return reply.code(200).send({
       success: true,
       data: {
