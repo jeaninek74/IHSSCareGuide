@@ -56,7 +56,7 @@ export default function Onboarding() {
               Welcome to IHSS Caregiver Companion
             </Typography>
             <Typography color="text.secondary" sx={{ mb: 3 }}>
-              Hello{user?.name ? `, ${user.name}` : ''}! This quick setup will help you understand
+              Hello{user?.email ? `, ${user.email.split('@')[0]}` : ''}! This quick setup will help you understand
               what this app does and get you ready to log your first shift.
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center', mb: 3 }}>
