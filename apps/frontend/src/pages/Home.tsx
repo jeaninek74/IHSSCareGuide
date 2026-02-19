@@ -67,9 +67,15 @@ const Home = () => {
         <Container maxWidth="md">
           <Stack spacing={4} alignItems="center" textAlign="center">
             <Typography
+              variant="overline"
+              sx={{ opacity: 0.85, letterSpacing: 2, fontSize: '0.85rem', fontWeight: 600 }}
+            >
+              In-Home Supportive Services
+            </Typography>
+            <Typography
               variant="h2"
               fontWeight={900}
-              sx={{ fontSize: { xs: '2.4rem', md: '3.5rem' }, lineHeight: 1.15 }}
+              sx={{ fontSize: { xs: '2.4rem', md: '3.5rem' }, lineHeight: 1.15, mt: '0 !important' }}
             >
               IHSS Care Guide
             </Typography>
