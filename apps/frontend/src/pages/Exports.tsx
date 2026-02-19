@@ -82,8 +82,7 @@ export default function Exports() {
     }
   };
 
-  if (loading) {
-    const buildPlainText = (summary: typeof latestSummary) => {
+  const buildPlainText = (summary: typeof latestSummary) => {
     if (!summary) return '';
     const lines: string[] = [];
     lines.push(`IHSS Weekly Summary — ${summary.weekRange}`);
@@ -127,7 +126,8 @@ export default function Exports() {
     win.print();
   };
 
-  return (
+  if (loading) {
+    return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
         <CircularProgress />
       </Box>
