@@ -61,6 +61,12 @@ export const authApi = {
 
   me: () =>
     request<AuthResponse>('/auth/me'),
+
+  updateProfile: (data: { name?: string; timezone?: string }) =>
+    request<{ success: boolean; data: { profile: UserProfile } }>('/auth/profile', {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
 };
 
 // ── Shifts ────────────────────────────────────────────────────────────────────
@@ -129,6 +135,8 @@ export interface Incident {
   userId: string;
   description: string;
   structuredJson: unknown | null;
+  modelUsed: string | null;
+  promptVersion: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -145,6 +153,10 @@ export const incidentsApi = {
 
   getOne: (incidentId: string) =>
     request<{ success: boolean; data: { incident: Incident } }>(`/incidents/${incidentId}`),
+  structure: (incidentId: string) =>
+    request<{ success: boolean; data: { incident: Incident } }>(`/incidents/${incidentId}/structure`, {
+      method: 'POST',
+    }),
 };
 
 // ── Notes ─────────────────────────────────────────────────────────────────────

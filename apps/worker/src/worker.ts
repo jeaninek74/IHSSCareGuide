@@ -1,31 +1,21 @@
 import pino from 'pino';
 import { PrismaClient } from '@prisma/client';
-import * as nodemailer from 'nodemailer';
+import sgMail from '@sendgrid/mail';
 
 const logger = pino({ level: process.env.APP_ENV === 'production' ? 'info' : 'debug' });
 const prisma = new PrismaClient();
 const APP_ENV = process.env.APP_ENV || 'development';
 const POLL_INTERVAL_MS = parseInt(process.env.WORKER_INTERVAL_MS || '300000', 10); // 5 min default
 
-// ── Email Transport ───────────────────────────────────────────────────────────
+// ── SendGrid Email Transport ──────────────────────────────────────────────────
+const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
+const SENDGRID_FROM = process.env.SENDGRID_FROM || 'noreply@ihsscareguide.com';
 
-function createTransport() {
-  const smtpHost = process.env.SMTP_HOST;
-  const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-
-  if (!smtpHost || !smtpUser || !smtpPass) {
-    logger.warn('SMTP not configured — email sending will be simulated');
-    return null;
-  }
-
-  return nodemailer.createTransport({
-    host: smtpHost,
-    port: smtpPort,
-    secure: smtpPort === 465,
-    auth: { user: smtpUser, pass: smtpPass },
-  });
+if (SENDGRID_API_KEY) {
+  sgMail.setApiKey(SENDGRID_API_KEY);
+  logger.info('SendGrid email transport configured');
+} else {
+  logger.warn('SENDGRID_API_KEY not set — email sending will be simulated');
 }
 
 async function sendReminderEmail(
@@ -34,42 +24,47 @@ async function sendReminderEmail(
   expirationDate: Date,
   daysUntilExpiry: number
 ): Promise<void> {
-  const transport = createTransport();
   const subject = `IHSS Certification Reminder: ${certName} expires in ${daysUntilExpiry} day${daysUntilExpiry !== 1 ? 's' : ''}`;
   const expiryStr = expirationDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const urgencyColor = daysUntilExpiry <= 7 ? '#d32f2f' : '#ed6c02';
 
   const html = `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-      <h2 style="color: #1976d2;">IHSS Caregiver Companion — Certification Reminder</h2>
-      <p>Hello,</p>
-      <p>This is a reminder that your <strong>${certName}</strong> certification is expiring soon.</p>
-      <table style="border-collapse: collapse; width: 100%; margin: 16px 0;">
-        <tr>
-          <td style="padding: 8px; border: 1px solid #ddd; background: #f5f5f5; font-weight: bold;">Certification</td>
-          <td style="padding: 8px; border: 1px solid #ddd;">${certName}</td>
-        </tr>
-        <tr>
-          <td style="padding: 8px; border: 1px solid #ddd; background: #f5f5f5; font-weight: bold;">Expiration Date</td>
-          <td style="padding: 8px; border: 1px solid #ddd; color: ${daysUntilExpiry <= 7 ? '#d32f2f' : '#ed6c02'};">
-            ${expiryStr} (${daysUntilExpiry} day${daysUntilExpiry !== 1 ? 's' : ''} remaining)
-          </td>
-        </tr>
-      </table>
-      <p><strong>What to do next:</strong> Log in to your IHSS Caregiver Companion account to update your certification details and ensure your records are current.</p>
-      <p style="color: #666; font-size: 12px; margin-top: 24px; padding-top: 16px; border-top: 1px solid #eee;">
-        This reminder was sent automatically by IHSS Caregiver Companion. Always verify certification requirements with your county IHSS office or official IHSS resources.
-      </p>
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+      <div style="background: #1976d2; color: white; padding: 20px 24px; border-radius: 8px 8px 0 0;">
+        <h2 style="margin: 0; font-size: 20px;">IHSS Caregiver Companion</h2>
+        <p style="margin: 4px 0 0; opacity: 0.9; font-size: 14px;">Certification Reminder</p>
+      </div>
+      <div style="background: #fff; border: 1px solid #e0e0e0; border-top: none; padding: 24px; border-radius: 0 0 8px 8px;">
+        <p style="margin-top: 0;">Hello,</p>
+        <p>This is a reminder that your <strong>${certName}</strong> certification is expiring soon.</p>
+        <table style="border-collapse: collapse; width: 100%; margin: 16px 0;">
+          <tr>
+            <td style="padding: 10px 12px; border: 1px solid #ddd; background: #f5f5f5; font-weight: bold; width: 40%;">Certification</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd;">${certName}</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px 12px; border: 1px solid #ddd; background: #f5f5f5; font-weight: bold;">Expiration Date</td>
+            <td style="padding: 10px 12px; border: 1px solid #ddd; color: ${urgencyColor}; font-weight: bold;">
+              ${expiryStr} (${daysUntilExpiry} day${daysUntilExpiry !== 1 ? 's' : ''} remaining)
+            </td>
+          </tr>
+        </table>
+        <p><strong>What to do next:</strong> Log in to your IHSS Caregiver Companion account to update your certification details and ensure your records are current.</p>
+        <p style="margin-bottom: 0; color: #666; font-size: 12px; padding-top: 16px; border-top: 1px solid #eee;">
+          This reminder was sent automatically by IHSS Caregiver Companion. Always verify certification requirements with your county IHSS office or official IHSS resources. This app is not affiliated with CDSS or any county IHSS program.
+        </p>
+      </div>
     </div>
   `;
 
-  if (!transport) {
-    logger.info({ toEmail, subject }, '[SIMULATED EMAIL] Reminder would be sent');
+  if (!SENDGRID_API_KEY) {
+    logger.info({ toEmail, subject }, '[SIMULATED EMAIL] Reminder would be sent via SendGrid');
     return;
   }
 
-  await transport.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+  await sgMail.send({
     to: toEmail,
+    from: SENDGRID_FROM,
     subject,
     html,
   });

@@ -25,6 +25,7 @@ import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import SchoolIcon from '@mui/icons-material/School';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { useAuth } from '../context/AuthContext';
 
@@ -35,6 +36,7 @@ const navLinks = [
   { label: 'Incidents', path: '/incidents', icon: <WarningAmberIcon fontSize="small" /> },
   { label: 'Assistant', path: '/assistant', icon: <HelpOutlineIcon fontSize="small" /> },
   { label: 'Certifications', path: '/certifications', icon: <SchoolIcon fontSize="small" /> },
+  { label: 'Account', path: '/profile', icon: <AccountCircleIcon fontSize="small" /> },
 ];
 
 const NavBar = () => {

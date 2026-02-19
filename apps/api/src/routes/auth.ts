@@ -183,4 +183,41 @@ export const authRoutes = async (app: FastifyInstance) => {
       },
     });
   });
+
+  // PATCH /auth/profile — update name and/or timezone
+  app.patch('/profile', { preHandler: [authMiddleware] }, async (request, reply) => {
+    const userId = (request as unknown as { userId?: string }).userId;
+    const updateProfileSchema = z.object({
+      name: z.string().min(1).max(100).optional(),
+      timezone: z.string().min(1).max(100).optional(),
+    });
+    const parsed = updateProfileSchema.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.code(400).send({
+        success: false,
+        error: { code: 'VALIDATION_ERROR', message: parsed.error.errors.map((e) => e.message).join(', '), requestId: request.id },
+      });
+    }
+    const { name, timezone } = parsed.data;
+    const updatedProfile = await prisma.userProfile.update({
+      where: { userId },
+      data: {
+        ...(name !== undefined ? { name } : {}),
+        ...(timezone !== undefined ? { timezone } : {}),
+      },
+    });
+    return reply.code(200).send({
+      success: true,
+      data: {
+        profile: {
+          id: updatedProfile.id,
+          userId: updatedProfile.userId,
+          name: updatedProfile.name,
+          timezone: updatedProfile.timezone,
+          createdAt: updatedProfile.createdAt.toISOString(),
+          updatedAt: updatedProfile.updatedAt.toISOString(),
+        },
+      },
+    });
+  });
 };

@@ -1,13 +1,15 @@
 import NavBar from '../components/NavBar';
 import { useState, useEffect } from 'react';
 import {
-  Box, Container, Typography, Button, Card, CardContent,
+  Box, Container, Typography, Button, Card, CardContent, Tooltip, Snackbar,
   Stack, Alert, CircularProgress, TextField, Accordion,
   AccordionSummary, AccordionDetails, Chip, Divider,
 } from '@mui/material';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import PrintIcon from '@mui/icons-material/Print';
 import { exportsApi, WeeklyExport } from '../services/apiClient';
 
 function getLastWeekBounds(): { weekStart: string; weekEnd: string } {
@@ -48,6 +50,7 @@ export default function Exports() {
   const [exports, setExports] = useState<WeeklyExport[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const bounds = getLastWeekBounds();
@@ -80,7 +83,51 @@ export default function Exports() {
   };
 
   if (loading) {
-    return (
+    const buildPlainText = (summary: typeof latestSummary) => {
+    if (!summary) return '';
+    const lines: string[] = [];
+    lines.push(`IHSS Weekly Summary — ${summary.weekRange}`);
+    lines.push(`Total Hours: ${summary.totalHours}`);
+    lines.push('');
+    if (summary.days) {
+      for (const day of summary.days) {
+        const label = new Date(day.date + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+        lines.push(`${label} — ${day.totalHours} hrs`);
+        for (const s of day.shifts) {
+          for (const h of s.highlights) {
+            lines.push(`  • ${h}`);
+          }
+        }
+      }
+    }
+    lines.push('');
+    lines.push('ESP Submission Checklist:');
+    if (summary.submissionChecklist) {
+      for (const item of summary.submissionChecklist) {
+        lines.push(`  ✓ ${item}`);
+      }
+    }
+    return lines.join('\n');
+  };
+
+  const handleCopy = async () => {
+    if (!latestSummary) return;
+    const text = buildPlainText(latestSummary);
+    await navigator.clipboard.writeText(text);
+    setCopied(true);
+  };
+
+  const handlePrint = () => {
+    if (!latestSummary) return;
+    const text = buildPlainText(latestSummary);
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`<html><head><title>IHSS Weekly Summary</title><style>body{font-family:Arial,sans-serif;padding:24px;white-space:pre-wrap;font-size:14px;}</style></head><body>${text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</body></html>`);
+    win.document.close();
+    win.print();
+  };
+
+  return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
         <CircularProgress />
       </Box>
@@ -147,7 +194,19 @@ export default function Exports() {
                 <AutoAwesomeIcon sx={{ fontSize: 18, mr: 1, verticalAlign: 'middle', color: 'secondary.main' }} />
                 {latestSummary.weekRange}
               </Typography>
-              <Chip label={`${latestSummary.totalHours} hrs total`} color="secondary" size="small" />
+              <Stack direction="row" spacing={1} alignItems="center">
+                <Chip label={`${latestSummary.totalHours} hrs total`} color="secondary" size="small" />
+                <Tooltip title="Copy as plain text">
+                  <Button size="small" variant="outlined" startIcon={<ContentCopyIcon />} onClick={handleCopy} sx={{ minWidth: 0 }}>
+                    Copy
+                  </Button>
+                </Tooltip>
+                <Tooltip title="Print summary">
+                  <Button size="small" variant="outlined" startIcon={<PrintIcon />} onClick={handlePrint} sx={{ minWidth: 0 }}>
+                    Print
+                  </Button>
+                </Tooltip>
+              </Stack>
             </Stack>
 
             {latestSummary.days && latestSummary.days.length > 0 && (
@@ -208,6 +267,15 @@ export default function Exports() {
         </Stack>
       )}
     </Container>
+    <>
+      <Snackbar
+        open={copied}
+        autoHideDuration={2500}
+        onClose={() => setCopied(false)}
+        message="Copied to clipboard"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
+    </>
     </>
   );
 }

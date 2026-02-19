@@ -17,6 +17,7 @@ import Onboarding from './pages/Onboarding';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Disclaimer from './pages/Disclaimer';
+import Profile from './pages/Profile';
 import { useAuth } from './context/AuthContext';
 
 // Pages that should NOT show the bottom nav
@@ -111,6 +112,14 @@ const App = () => {
           }
         />
 
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
         {/* 404 fallback */}
         <Route path="*" element={<Home />} />
       </Routes>
