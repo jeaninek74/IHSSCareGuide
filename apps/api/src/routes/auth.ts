@@ -70,6 +70,14 @@ export const authRoutes = async (app: FastifyInstance) => {
       },
       include: { profile: true },
     });
+    // Create default reminder rules for new user (30, 7, 1 days before expiration)
+    await prisma.reminderRule.createMany({
+      data: [
+        { providerId: user.id, daysBeforeExpiration: 30, enabled: true },
+        { providerId: user.id, daysBeforeExpiration: 7, enabled: true },
+        { providerId: user.id, daysBeforeExpiration: 1, enabled: true },
+      ],
+    });
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
     setAuthCookie(reply, token);
     return reply.code(201).send({

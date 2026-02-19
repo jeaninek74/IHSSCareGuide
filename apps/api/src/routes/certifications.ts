@@ -329,4 +329,90 @@ export const certificationRoutes = async (app: FastifyInstance) => {
       return reply.code(200).send({ success: true, data: { rule: updated } });
     }
   );
+
+  /**
+   * POST /certifications/reminders/rules/seed
+   * Create default reminder rules (30, 7, 1 days) for users who have none.
+   * Idempotent — safe to call multiple times.
+   */
+  app.post(
+    '/reminders/rules/seed',
+    { preHandler: [authMiddleware] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const userId = (request as AuthRequest).userId!;
+      const existing = await prisma.reminderRule.count({ where: { providerId: userId } });
+      if (existing > 0) {
+        const rules = await prisma.reminderRule.findMany({
+          where: { providerId: userId },
+          orderBy: { daysBeforeExpiration: 'desc' },
+        });
+        return reply.code(200).send({ success: true, data: { rules, seeded: false } });
+      }
+      await prisma.reminderRule.createMany({
+        data: [
+          { providerId: userId, daysBeforeExpiration: 30, enabled: true },
+          { providerId: userId, daysBeforeExpiration: 7, enabled: true },
+          { providerId: userId, daysBeforeExpiration: 1, enabled: true },
+        ],
+      });
+      const rules = await prisma.reminderRule.findMany({
+        where: { providerId: userId },
+        orderBy: { daysBeforeExpiration: 'desc' },
+      });
+      return reply.code(201).send({ success: true, data: { rules, seeded: true } });
+    }
+  );
+
+  /**
+   * POST /certifications/reminders/rules
+   * Create a custom reminder rule.
+   */
+  app.post(
+    '/reminders/rules',
+    { preHandler: [authMiddleware] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const userId = (request as AuthRequest).userId!;
+      const { daysBeforeExpiration, certificationTypeId } = request.body as {
+        daysBeforeExpiration: number;
+        certificationTypeId?: string;
+      };
+      if (!daysBeforeExpiration || daysBeforeExpiration < 1 || daysBeforeExpiration > 365) {
+        return reply.code(400).send({
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'daysBeforeExpiration must be between 1 and 365', requestId: request.id },
+        });
+      }
+      const rule = await prisma.reminderRule.create({
+        data: {
+          providerId: userId,
+          daysBeforeExpiration,
+          enabled: true,
+          ...(certificationTypeId ? { certificationTypeId } : {}),
+        },
+      });
+      return reply.code(201).send({ success: true, data: { rule } });
+    }
+  );
+
+  /**
+   * DELETE /certifications/reminders/rules/:id
+   * Delete a reminder rule.
+   */
+  app.delete(
+    '/reminders/rules/:id',
+    { preHandler: [authMiddleware] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const userId = (request as AuthRequest).userId!;
+      const { id } = request.params as { id: string };
+      const rule = await prisma.reminderRule.findFirst({ where: { id, providerId: userId } });
+      if (!rule) {
+        return reply.code(404).send({
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Reminder rule not found', requestId: request.id },
+        });
+      }
+      await prisma.reminderRule.delete({ where: { id } });
+      return reply.code(200).send({ success: true, data: { deleted: true } });
+    }
+  );
 };
