@@ -40,6 +40,7 @@ model UserProfile {
 model Shift {
   id              String          @id @default(uuid())
   userId          String          @map("user_id")
+  recipientName   String?         @map("recipient_name")
   status          ShiftStatus     @default(active)
   startedAt       DateTime        @default(now()) @map("started_at")
   endedAt         DateTime?       @map("ended_at")
