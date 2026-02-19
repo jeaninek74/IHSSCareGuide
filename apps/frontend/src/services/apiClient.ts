@@ -57,7 +57,7 @@ export const authApi = {
     }),
 
   logout: () =>
-    request<{ success: boolean }>('/auth/logout', { method: 'POST' }),
+    request<{ success: boolean }>('/auth/logout', { method: 'POST', body: JSON.stringify({}) }),
 
   me: () =>
     request<AuthResponse>('/auth/me'),
@@ -111,7 +111,7 @@ export const shiftsApi = {
     }),
 
   end: (shiftId: string) =>
-    request<ShiftResponse>(`/shifts/${shiftId}/end`, { method: 'POST' }),
+    request<ShiftResponse>(`/shifts/${shiftId}/end`, { method: 'POST', body: JSON.stringify({}) }),
 
   addEvent: (shiftId: string, type: string, description: string, occurredAt?: string) =>
     request<{ success: boolean; data: { event: ShiftEvent } }>(`/shifts/${shiftId}/events`, {
@@ -160,6 +160,7 @@ export const incidentsApi = {
   structure: (incidentId: string) =>
     request<{ success: boolean; data: { incident: Incident } }>(`/incidents/${incidentId}/structure`, {
       method: 'POST',
+      body: JSON.stringify({}),
     }),
 };
 
@@ -178,6 +179,7 @@ export const notesApi = {
   generate: (shiftId: string) =>
     request<{ success: boolean; data: { note: StructuredNote } }>(`/notes/shifts/${shiftId}/generate`, {
       method: 'POST',
+      body: JSON.stringify({}),
     }),
   getForShift: (shiftId: string) =>
     request<{ success: boolean; data: { note: StructuredNote } }>(`/notes/shifts/${shiftId}`),
