@@ -1,3 +1,4 @@
+import NavBar from '../components/NavBar';
 import { useState, useEffect, FormEvent } from 'react';
 import {
   Box, Container, Typography, Button, Card, CardContent,
@@ -61,7 +62,9 @@ export default function Incidents() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <>
+      <NavBar />
+      <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 2, sm: 3 } }}>
       <Typography variant="h4" fontWeight={700} gutterBottom>Incident Reports</Typography>
       <Typography variant="body2" color="text.secondary" mb={3}>
         Document incidents for your records. AI-assisted structuring will be available in a future update.
@@ -115,5 +118,6 @@ export default function Incidents() {
         </Stack>
       )}
     </Container>
+    </>
   );
 }

@@ -1,7 +1,8 @@
 
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Box } from '@mui/material';
 import ProtectedRoute from './components/ProtectedRoute';
+import BottomNav from './components/BottomNav';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -16,10 +17,23 @@ import Onboarding from './pages/Onboarding';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import Disclaimer from './pages/Disclaimer';
+import { useAuth } from './context/AuthContext';
+
+// Pages that should NOT show the bottom nav
+const NO_BOTTOM_NAV = ['/', '/login', '/register', '/onboarding', '/terms', '/privacy', '/disclaimer'];
 
 const App = () => {
+  const { user } = useAuth();
+  const location = useLocation();
+  const showBottomNav = user && !NO_BOTTOM_NAV.includes(location.pathname);
+
   return (
-    <Box minHeight="100vh" bgcolor="background.default">
+    <Box
+      minHeight="100vh"
+      bgcolor="background.default"
+      // Add bottom padding on mobile when bottom nav is visible
+      pb={{ xs: showBottomNav ? '72px' : 0, sm: 0 }}
+    >
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Home />} />
@@ -96,7 +110,13 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+
+        {/* 404 fallback */}
+        <Route path="*" element={<Home />} />
       </Routes>
+
+      {/* Mobile bottom navigation */}
+      {showBottomNav && <BottomNav />}
     </Box>
   );
 };

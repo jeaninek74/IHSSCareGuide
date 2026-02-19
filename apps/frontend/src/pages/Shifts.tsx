@@ -1,3 +1,4 @@
+import NavBar from '../components/NavBar';
 import { useState, useEffect, FormEvent } from 'react';
 import {
   Box, Container, Typography, Button, Card, CardContent,
@@ -139,7 +140,9 @@ export default function Shifts() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <>
+      <NavBar />
+      <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 2, sm: 3 } }}>
       <Typography variant="h4" fontWeight={700} gutterBottom>Shift Companion</Typography>
 
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
@@ -317,5 +320,6 @@ export default function Shifts() {
         </Stack>
       )}
     </Container>
+    </>
   );
 }

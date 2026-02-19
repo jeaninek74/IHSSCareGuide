@@ -5,10 +5,12 @@ import {
   Typography,
   Grid,
   Card,
+  CardActionArea,
   CardContent,
-  Button,
   Stack,
   Chip,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import AssignmentIcon from '@mui/icons-material/Assignment';
@@ -17,109 +19,134 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import VerifiedIcon from '@mui/icons-material/Verified';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import ApiStatus from '../components/ApiStatus';
+import NavBar from '../components/NavBar';
 
 const Dashboard = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const navCards = [
     {
-      icon: <ScheduleIcon fontSize="large" color="primary" />,
+      icon: <ScheduleIcon sx={{ fontSize: { xs: 36, sm: 48 } }} color="primary" />,
       title: 'Shift Companion',
       description: 'Start a new shift or view your active shift.',
       action: () => navigate('/shifts'),
-      label: 'Go to Shifts',
-      color: 'primary' as const,
+      color: '#e3f2fd',
+      borderColor: '#1976d2',
     },
     {
-      icon: <AssignmentIcon fontSize="large" color="secondary" />,
+      icon: <AssignmentIcon sx={{ fontSize: { xs: 36, sm: 48 } }} color="secondary" />,
       title: 'Weekly Export',
       description: 'Generate your weekly summary for ESP submission.',
       action: () => navigate('/exports'),
-      label: 'Weekly Export',
-      color: 'secondary' as const,
+      color: '#f3e5f5',
+      borderColor: '#7b1fa2',
     },
     {
-      icon: <WarningAmberIcon fontSize="large" sx={{ color: '#f57c00' }} />,
+      icon: <WarningAmberIcon sx={{ fontSize: { xs: 36, sm: 48 }, color: '#f57c00' }} />,
       title: 'Incidents',
       description: 'Log and manage incident reports.',
       action: () => navigate('/incidents'),
-      label: 'View Incidents',
-      color: 'warning' as const,
+      color: '#fff3e0',
+      borderColor: '#f57c00',
     },
     {
-      icon: <HelpOutlineIcon fontSize="large" sx={{ color: '#7b1fa2' }} />,
+      icon: <HelpOutlineIcon sx={{ fontSize: { xs: 36, sm: 48 }, color: '#7b1fa2' }} />,
       title: 'Knowledge Assistant',
       description: 'Ask IHSS and ESP workflow questions.',
       action: () => navigate('/assistant'),
-      label: 'Open Assistant',
-      color: 'secondary' as const,
+      color: '#ede7f6',
+      borderColor: '#7b1fa2',
     },
     {
-      icon: <VerifiedIcon fontSize="large" sx={{ color: '#0288d1' }} />,
+      icon: <VerifiedIcon sx={{ fontSize: { xs: 36, sm: 48 }, color: '#0288d1' }} />,
       title: 'Certifications',
       description: 'Track your IHSS training and certification expiration dates.',
       action: () => navigate('/certifications'),
-      label: 'View Certifications',
-      color: 'info' as const,
+      color: '#e1f5fe',
+      borderColor: '#0288d1',
     },
   ];
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Stack spacing={4}>
-        {/* Header */}
-        <Box display="flex" justifyContent="space-between" alignItems="center" flexWrap="wrap" gap={2}>
+    <>
+      <NavBar />
+      <Container maxWidth="lg" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 2, sm: 3 } }}>
+        <Stack spacing={{ xs: 2, sm: 4 }}>
+          {/* Header */}
           <Box>
-            <Typography variant="h4" fontWeight={700}>
+            <Typography
+              variant={isMobile ? 'h5' : 'h4'}
+              fontWeight={700}
+              gutterBottom
+            >
               Welcome back{profile?.name ? `, ${profile.name}` : ''}
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body2" color="text.secondary">
               What would you like to do today?
             </Typography>
           </Box>
-          <ApiStatus />
-        </Box>
 
-        {/* Navigation Cards */}
-        <Grid container spacing={3}>
-          {navCards.map((card) => (
-            <Grid item xs={12} sm={6} md={3} key={card.title}>
-              <Card sx={{ height: '100%', cursor: 'pointer' }} onClick={card.action}>
-                <CardContent>
-                  <Stack spacing={2} alignItems="center" textAlign="center">
-                    {card.icon}
-                    <Typography variant="h6" fontWeight={600}>
-                      {card.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {card.description}
-                    </Typography>
-                    <Button variant="contained" color={card.color} size="small" fullWidth>
-                      {card.label}
-                    </Button>
-                  </Stack>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+          {/* Navigation Cards */}
+          <Grid container spacing={{ xs: 1.5, sm: 2, md: 3 }}>
+            {navCards.map((card) => (
+              <Grid item xs={6} sm={6} md={4} lg={2.4} key={card.title}>
+                <Card
+                  sx={{
+                    height: '100%',
+                    border: `2px solid ${card.borderColor}20`,
+                    bgcolor: card.color,
+                    transition: 'transform 0.15s, box-shadow 0.15s',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: 4,
+                    },
+                  }}
+                >
+                  <CardActionArea
+                    onClick={card.action}
+                    sx={{ height: '100%', p: { xs: 1, sm: 0 } }}
+                  >
+                    <CardContent sx={{ p: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+                      <Stack spacing={{ xs: 1, sm: 1.5 }} alignItems="center" textAlign="center">
+                        {card.icon}
+                        <Typography
+                          variant={isMobile ? 'caption' : 'subtitle2'}
+                          fontWeight={700}
+                          lineHeight={1.2}
+                        >
+                          {card.title}
+                        </Typography>
+                        {!isMobile && (
+                          <Typography variant="caption" color="text.secondary">
+                            {card.description}
+                          </Typography>
+                        )}
+                      </Stack>
+                    </CardContent>
+                  </CardActionArea>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
 
-        {/* Disclaimer */}
-        <Card sx={{ bgcolor: '#fff8e1', border: '1px solid #ffe082' }}>
-          <CardContent>
-            <Stack direction="row" spacing={1} alignItems="flex-start">
-              <Chip label="Reminder" size="small" color="warning" />
-              <Typography variant="body2" color="text.secondary">
-                This application is a workflow support tool and does not replace official IHSS or ESP
-                systems. Always verify information with official IHSS resources before taking action.
-              </Typography>
-            </Stack>
-          </CardContent>
-        </Card>
-      </Stack>
-    </Container>
+          {/* Disclaimer */}
+          <Card sx={{ bgcolor: '#fff8e1', border: '1px solid #ffe082' }}>
+            <CardContent sx={{ py: { xs: 1.5, sm: 2 }, '&:last-child': { pb: { xs: 1.5, sm: 2 } } }}>
+              <Stack direction="row" spacing={1} alignItems="flex-start">
+                <Chip label="Note" size="small" color="warning" sx={{ flexShrink: 0 }} />
+                <Typography variant="caption" color="text.secondary">
+                  This app is a workflow support tool. Always verify information with official IHSS
+                  resources before taking action.
+                </Typography>
+              </Stack>
+            </CardContent>
+          </Card>
+        </Stack>
+      </Container>
+    </>
   );
 };
 

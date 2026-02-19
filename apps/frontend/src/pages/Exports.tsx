@@ -1,3 +1,4 @@
+import NavBar from '../components/NavBar';
 import { useState, useEffect } from 'react';
 import {
   Box, Container, Typography, Button, Card, CardContent,
@@ -87,7 +88,9 @@ export default function Exports() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <>
+      <NavBar />
+      <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 2, sm: 3 } }}>
       <Typography variant="h4" fontWeight={700} gutterBottom>Weekly Export</Typography>
       <Typography variant="body2" color="text.secondary" mb={3}>
         Generate a structured weekly summary to prepare for manual ESP timesheet submission.
@@ -205,5 +208,6 @@ export default function Exports() {
         </Stack>
       )}
     </Container>
+    </>
   );
 }

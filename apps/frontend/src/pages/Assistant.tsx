@@ -12,7 +12,10 @@ import {
   Alert,
   Collapse,
   IconButton,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
+import NavBar from '../components/NavBar';
 import SendIcon from '@mui/icons-material/Send';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -197,6 +200,8 @@ function MessageBubble({ message }: { message: Message }) {
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function Assistant() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 'welcome',
@@ -256,13 +261,21 @@ export default function Assistant() {
   };
 
   return (
-    <Container
-      maxWidth="md"
-      sx={{ py: 3, height: 'calc(100vh - 80px)', display: 'flex', flexDirection: 'column' }}
-    >
+    <>
+      <NavBar />
+      <Container
+        maxWidth="md"
+        sx={{
+          py: { xs: 1, sm: 3 },
+          px: { xs: 1, sm: 3 },
+          height: { xs: 'calc(100vh - 56px - 64px)', sm: 'calc(100vh - 64px)' },
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
       {/* Header */}
-      <Box mb={2}>
-        <Typography variant="h5" fontWeight={700} gutterBottom>
+        <Box mb={{ xs: 1, sm: 2 }}>
+          <Typography variant={isMobile ? 'h6' : 'h5'} fontWeight={700} gutterBottom>
           IHSS Assistant
         </Typography>
         <Typography variant="body2" color="text.secondary">
@@ -374,5 +387,6 @@ export default function Assistant() {
         </Typography>
       </Box>
     </Container>
+    </>
   );
 }
