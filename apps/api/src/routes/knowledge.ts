@@ -1,0 +1,277 @@
+import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { z } from 'zod';
+import { prisma } from '../utils/prisma';
+import { authMiddleware } from '../middleware/auth';
+import { generateEmbedding, generateStructuredJSON } from '../utils/aiService';
+import { knowledgeAssistantPrompt } from '../shared/prompts';
+
+interface AuthRequest extends FastifyRequest {
+  userId?: string;
+}
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface AssistantAnswer {
+  answer: string;
+  sources: Array<{
+    documentTitle: string;
+    source: string;
+    snippet: string;
+  }>;
+  verificationReminder: string;
+  confidence: 'high' | 'low';
+}
+
+const askBodySchema = z.object({
+  question: z.string().min(3, 'Question must be at least 3 characters').max(1000, 'Question too long'),
+});
+
+const ingestBodySchema = z.object({
+  title: z.string().min(1),
+  source: z.string().min(1),
+  jurisdiction: z.string().optional(),
+  effectiveDate: z.string().optional(),
+  chunks: z.array(
+    z.object({
+      title: z.string(),
+      content: z.string().min(10),
+    })
+  ).min(1).max(200),
+});
+
+// ── Helper: cosine similarity vector search via raw SQL ───────────────────────
+async function searchSimilarChunks(embedding: number[], limit = 5) {
+  const vectorStr = `[${embedding.join(',')}]`;
+  // Use raw SQL for pgvector cosine similarity search
+  const results = await prisma.$queryRawUnsafe<Array<{
+    id: string;
+    document_id: string;
+    title: string;
+    source: string;
+    content: string;
+    chunk_index: number;
+    similarity: number;
+  }>>(
+    `SELECT kc.id, kc.document_id, kc.title, kc.source, kc.content, kc.chunk_index,
+            1 - (kc.embedding <=> $1::vector) AS similarity
+     FROM knowledge_chunks kc
+     WHERE kc.embedding IS NOT NULL
+     ORDER BY kc.embedding <=> $1::vector
+     LIMIT $2`,
+    vectorStr,
+    limit
+  );
+  return results;
+}
+
+// ── Routes ────────────────────────────────────────────────────────────────────
+
+export const knowledgeRoutes = async (app: FastifyInstance) => {
+  /**
+   * POST /knowledge/ask
+   * Ask a question — embed it, retrieve top-k chunks, generate grounded answer.
+   */
+  app.post(
+    '/ask',
+    { preHandler: [authMiddleware] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const bodyParsed = askBodySchema.safeParse(request.body);
+      if (!bodyParsed.success) {
+        return reply.code(400).send({
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: bodyParsed.error.errors.map((e) => e.message).join(', '),
+            requestId: request.id,
+          },
+        });
+      }
+
+      const { question } = bodyParsed.data;
+
+      // Check if we have any knowledge chunks
+      const chunkCount = await prisma.knowledgeChunk.count();
+      if (chunkCount === 0) {
+        return reply.code(200).send({
+          success: true,
+          data: {
+            answer: {
+              answer: 'The knowledge base has not been populated yet. Please contact your administrator to seed IHSS and ESP documentation.',
+              sources: [],
+              verificationReminder: 'Always verify information with official IHSS or ESP resources before taking action.',
+              confidence: 'low',
+            },
+          },
+        });
+      }
+
+      // 1. Embed the question
+      const questionEmbedding = await generateEmbedding(question);
+
+      // 2. Retrieve top-5 similar chunks
+      const chunks = await searchSimilarChunks(questionEmbedding, 5);
+
+      if (chunks.length === 0) {
+        return reply.code(200).send({
+          success: true,
+          data: {
+            answer: {
+              answer: 'I do not have sufficient information to confirm. Please verify using official IHSS or ESP resources.',
+              sources: [],
+              verificationReminder: 'Always verify information with official IHSS or ESP resources before taking action.',
+              confidence: 'low',
+            },
+          },
+        });
+      }
+
+      // 3. Build retrieved chunks text
+      const retrievedChunks = chunks
+        .map((c, i) => `[${i + 1}] Source: ${c.source}\nTitle: ${c.title}\nContent: ${c.content}`)
+        .join('\n\n---\n\n');
+
+      // 4. Generate grounded answer
+      const prompt = knowledgeAssistantPrompt.build({ question, retrievedChunks });
+      const answerData = await generateStructuredJSON<AssistantAnswer>(prompt);
+
+      return reply.code(200).send({
+        success: true,
+        data: { answer: answerData },
+      });
+    }
+  );
+
+  /**
+   * POST /knowledge/ingest
+   * Ingest a knowledge document with chunks and generate embeddings.
+   * Admin-only endpoint (requires ADMIN_SECRET header).
+   */
+  app.post(
+    '/ingest',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      // Simple admin secret check
+      const adminSecret = request.headers['x-admin-secret'];
+      if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+        return reply.code(401).send({
+          success: false,
+          error: { code: 'UNAUTHORIZED', message: 'Admin secret required.', requestId: request.id },
+        });
+      }
+
+      const bodyParsed = ingestBodySchema.safeParse(request.body);
+      if (!bodyParsed.success) {
+        return reply.code(400).send({
+          success: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: bodyParsed.error.errors.map((e) => e.message).join(', '),
+            requestId: request.id,
+          },
+        });
+      }
+
+      const { title, source, jurisdiction, effectiveDate, chunks } = bodyParsed.data;
+
+      // Create the document
+      const doc = await prisma.knowledgeDocument.create({
+        data: {
+          title,
+          source,
+          jurisdiction: jurisdiction || null,
+          effectiveDate: effectiveDate ? new Date(effectiveDate) : null,
+        },
+      });
+
+      // Process chunks — generate embeddings and insert
+      let processed = 0;
+      const errors: string[] = [];
+
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        try {
+          const embedding = await generateEmbedding(chunk.content);
+          const vectorStr = `[${embedding.join(',')}]`;
+
+          // Insert with raw SQL to use pgvector type
+          await prisma.$executeRawUnsafe(
+            `INSERT INTO knowledge_chunks (id, document_id, title, source, content, chunk_index, embedding, created_at)
+             VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6::vector, NOW())`,
+            doc.id,
+            chunk.title,
+            source,
+            chunk.content,
+            i,
+            vectorStr
+          );
+          processed++;
+        } catch (err) {
+          errors.push(`Chunk ${i}: ${err instanceof Error ? err.message : String(err)}`);
+        }
+      }
+
+      return reply.code(201).send({
+        success: true,
+        data: {
+          document: {
+            id: doc.id,
+            title: doc.title,
+            source: doc.source,
+            chunksProcessed: processed,
+            chunksTotal: chunks.length,
+            errors: errors.length > 0 ? errors : undefined,
+          },
+        },
+      });
+    }
+  );
+
+  /**
+   * GET /knowledge/documents
+   * List all knowledge documents (authenticated).
+   */
+  app.get(
+    '/documents',
+    { preHandler: [authMiddleware] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const docs = await prisma.knowledgeDocument.findMany({
+        orderBy: { createdAt: 'desc' },
+        include: { _count: { select: { chunks: true } } },
+      });
+
+      return reply.code(200).send({
+        success: true,
+        data: {
+          documents: docs.map((d) => ({
+            id: d.id,
+            title: d.title,
+            source: d.source,
+            jurisdiction: d.jurisdiction,
+            effectiveDate: d.effectiveDate?.toISOString() || null,
+            chunkCount: d._count.chunks,
+            createdAt: d.createdAt.toISOString(),
+          })),
+        },
+      });
+    }
+  );
+
+  /**
+   * GET /knowledge/stats
+   * Return knowledge base stats.
+   */
+  app.get(
+    '/stats',
+    { preHandler: [authMiddleware] },
+    async (_request: FastifyRequest, reply: FastifyReply) => {
+      const [docCount, chunkCount] = await Promise.all([
+        prisma.knowledgeDocument.count(),
+        prisma.knowledgeChunk.count(),
+      ]);
+
+      return reply.code(200).send({
+        success: true,
+        data: { documents: docCount, chunks: chunkCount },
+      });
+    }
+  );
+};
