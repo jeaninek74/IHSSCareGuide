@@ -71,19 +71,19 @@ const Home = () => {
               fontWeight={900}
               sx={{ fontSize: { xs: '2.4rem', md: '3.5rem' }, lineHeight: 1.15 }}
             >
-              IHSS Caregiver Companion
+              IHSS Care Guide
             </Typography>
             <Typography
               variant="h5"
               sx={{ opacity: 0.92, maxWidth: 600, fontWeight: 400, lineHeight: 1.5 }}
             >
-              The app that handles your paperwork so you can focus on caring.
+              IHSS Care Guide handles your paperwork so you can focus on caring.
             </Typography>
             <Typography
               variant="body1"
               sx={{ opacity: 0.8, maxWidth: 520, fontSize: '1.05rem' }}
             >
-              Track shifts. Write notes. Report incidents. Get IHSS answers. All in one place, all free.
+              IHSS Care Guide gives California caregivers one free app to track shifts, write notes, report incidents, and get answers.
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mt={2}>
               {isAuthenticated ? (
@@ -168,7 +168,7 @@ const Home = () => {
             mx="auto"
             fontSize="1.05rem"
           >
-            Six tools built specifically for IHSS caregivers — no training required.
+            Six tools built specifically for IHSS Care Guide users — no training required.
           </Typography>
           <Grid container spacing={3}>
             {FEATURES.map((f) => (
@@ -315,7 +315,7 @@ const Home = () => {
               Ready to make caregiving easier?
             </Typography>
             <Typography variant="body1" sx={{ opacity: 0.88, mb: 5, fontSize: '1.05rem' }}>
-              Join caregivers who spend less time on paperwork and more time on care.
+              Join IHSS Care Guide users who spend less time on paperwork and more time on care.
             </Typography>
             <Button
               variant="contained"
@@ -348,7 +348,7 @@ const Home = () => {
             alignItems="center"
           >
             <Typography variant="caption" color="grey.500">
-              &copy; {new Date().getFullYear()} IHSS Caregiver Companion
+              &copy; {new Date().getFullYear()} IHSS Care Guide
             </Typography>
             <Typography variant="caption" color="grey.600" sx={{ display: { xs: 'none', sm: 'block' } }}>
               |
@@ -364,7 +364,7 @@ const Home = () => {
             </Link>
           </Stack>
           <Typography variant="caption" color="grey.600" textAlign="center" display="block" mt={1.5}>
-            Not affiliated with CDSS, any county IHSS program, or the Electronic Services Portal (ESP).
+            IHSS Care Guide is not affiliated with CDSS, any county IHSS program, or the Electronic Services Portal (ESP).
           </Typography>
         </Container>
       </Box>
