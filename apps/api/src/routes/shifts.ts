@@ -198,4 +198,18 @@ export const shiftRoutes = async (app: FastifyInstance) => {
 
     return reply.code(200).send({ success: true, data: { shifts, weekStart, weekEnd } });
   });
+
+  // GET /shifts/:shiftId/events — get events for a specific shift
+  app.get('/:shiftId/events', async (request: FastifyRequest<{ Params: { shiftId: string } }>, reply: FastifyReply) => {
+    const userId = getUserId(request);
+    const { shiftId } = request.params;
+    const shift = await prisma.shift.findUnique({ where: { id: shiftId } });
+    if (!shift) return notFound(reply, 'Shift not found.');
+    if (shift.userId !== userId) return forbidden(reply);
+    const events = await prisma.shiftEvent.findMany({
+      where: { shiftId },
+      orderBy: { occurredAt: 'asc' },
+    });
+    return reply.code(200).send({ success: true, data: { events } });
+  });
 };
