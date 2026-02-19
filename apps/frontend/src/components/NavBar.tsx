@@ -8,6 +8,7 @@ import {
   IconButton,
   Menu,
   MenuItem,
+  Divider,
 } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { useNavigate } from 'react-router-dom';
@@ -32,6 +33,11 @@ const NavBar = () => {
     navigate('/');
   };
 
+  const navTo = (path: string) => {
+    handleClose();
+    navigate(path);
+  };
+
   return (
     <AppBar position="static" elevation={1}>
       <Toolbar>
@@ -52,7 +58,16 @@ const NavBar = () => {
               <AccountCircleIcon />
             </IconButton>
             <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
-              <MenuItem onClick={() => { handleClose(); navigate('/dashboard'); }}>Dashboard</MenuItem>
+              <MenuItem onClick={() => navTo('/dashboard')}>Dashboard</MenuItem>
+              <Divider />
+              <MenuItem onClick={() => navTo('/shifts')}>Shifts</MenuItem>
+              <MenuItem onClick={() => navTo('/incidents')}>Incidents</MenuItem>
+              <MenuItem onClick={() => navTo('/exports')}>Weekly Exports</MenuItem>
+              <MenuItem onClick={() => navTo('/assistant')}>AI Assistant</MenuItem>
+              <Divider />
+              <MenuItem onClick={() => navTo('/certifications')}>Certifications</MenuItem>
+              <MenuItem onClick={() => navTo('/notifications')}>Notification Settings</MenuItem>
+              <Divider />
               <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </Box>

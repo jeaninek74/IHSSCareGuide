@@ -11,7 +11,8 @@
   "dependencies": {
     "@prisma/client": "^5.8.0",
     "openai": "^4.26.0",
-    "pino": "^8.17.0"
+    "pino": "^8.17.0",
+    "nodemailer": "^6.9.8"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",

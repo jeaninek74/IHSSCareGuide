@@ -15,10 +15,12 @@ model User {
   passwordHash String       @map("password_hash")
   createdAt    DateTime     @default(now()) @map("created_at")
   updatedAt    DateTime     @updatedAt @map("updated_at")
-  profile      UserProfile?
-  shifts       Shift[]
-  incidents    Incident[]
-  weeklyExports WeeklyExport[]
+  profile               UserProfile?
+  shifts                Shift[]
+  incidents             Incident[]
+  weeklyExports         WeeklyExport[]
+  providerCertifications ProviderCertification[]
+  reminderRules         ReminderRule[]
 
   @@map("users")
 }
@@ -111,6 +113,88 @@ model Incident {
 
   @@index([userId])
   @@map("incidents")
+}
+
+model CertificationType {
+  id                   String                  @id @default(uuid())
+  name                 String
+  description          String?
+  defaultValidityDays  Int?                    @map("default_validity_days")
+  isCommon             Boolean                 @default(false) @map("is_common")
+  createdAt            DateTime                @default(now()) @map("created_at")
+  certifications       ProviderCertification[]
+  reminderRules        ReminderRule[]
+
+  @@map("certification_types")
+}
+
+enum CertificationStatus {
+  active
+  expired
+  expiring_soon
+  missing
+}
+
+enum ReminderChannel {
+  email
+}
+
+enum ReminderEventStatus {
+  scheduled
+  sent
+  failed
+}
+
+model ProviderCertification {
+  id                  String              @id @default(uuid())
+  providerId          String              @map("provider_id")
+  certificationTypeId String?             @map("certification_type_id")
+  customName          String?             @map("custom_name")
+  issuedDate          DateTime?           @map("issued_date")
+  expirationDate      DateTime?           @map("expiration_date")
+  status              CertificationStatus @default(active)
+  documentUrl         String?             @map("document_url")
+  notes               String?
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+  provider            User                @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  certificationType   CertificationType?  @relation(fields: [certificationTypeId], references: [id], onDelete: SetNull)
+  reminderEvents      ReminderEvent[]
+
+  @@index([providerId])
+  @@index([status])
+  @@map("provider_certifications")
+}
+
+model ReminderRule {
+  id                  String             @id @default(uuid())
+  providerId          String             @map("provider_id")
+  certificationTypeId String?            @map("certification_type_id")
+  daysBeforeExpiration Int               @map("days_before_expiration")
+  enabled             Boolean            @default(true)
+  createdAt           DateTime           @default(now()) @map("created_at")
+  updatedAt           DateTime           @updatedAt @map("updated_at")
+  provider            User               @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  certificationType   CertificationType? @relation(fields: [certificationTypeId], references: [id], onDelete: SetNull)
+
+  @@index([providerId])
+  @@map("reminder_rules")
+}
+
+model ReminderEvent {
+  id                      String               @id @default(uuid())
+  providerCertificationId String               @map("provider_certification_id")
+  scheduledFor            DateTime             @map("scheduled_for")
+  sentAt                  DateTime?            @map("sent_at")
+  channel                 ReminderChannel      @default(email)
+  status                  ReminderEventStatus  @default(scheduled)
+  errorMessage            String?              @map("error_message")
+  createdAt               DateTime             @default(now()) @map("created_at")
+  certification           ProviderCertification @relation(fields: [providerCertificationId], references: [id], onDelete: Cascade)
+
+  @@index([scheduledFor])
+  @@index([status])
+  @@map("reminder_events")
 }
 
 model KnowledgeDocument {

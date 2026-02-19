@@ -14,6 +14,7 @@ import ScheduleIcon from '@mui/icons-material/Schedule';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import VerifiedIcon from '@mui/icons-material/Verified';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ApiStatus from '../components/ApiStatus';
@@ -54,6 +55,14 @@ const Dashboard = () => {
       action: () => navigate('/assistant'),
       label: 'Open Assistant',
       color: 'secondary' as const,
+    },
+    {
+      icon: <VerifiedIcon fontSize="large" sx={{ color: '#0288d1' }} />,
+      title: 'Certifications',
+      description: 'Track your IHSS training and certification expiration dates.',
+      action: () => navigate('/certifications'),
+      label: 'View Certifications',
+      color: 'info' as const,
     },
   ];
 

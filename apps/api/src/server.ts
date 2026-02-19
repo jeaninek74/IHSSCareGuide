@@ -10,6 +10,8 @@ import { incidentRoutes } from './routes/incidents';
 import { notesRoutes } from './routes/notes';
 import { exportsRoutes } from './routes/exports';
 import { knowledgeRoutes } from './routes/knowledge';
+import { certificationRoutes } from './routes/certifications';
+import { trainingGuidanceRoutes } from './routes/trainingGuidance';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './plugins/requestLogger';
 import { prisma } from './utils/prisma';
@@ -79,6 +81,8 @@ export const buildApp = async () => {
   await app.register(notesRoutes, { prefix: '/notes' });
   await app.register(exportsRoutes, { prefix: '/exports' });
   await app.register(knowledgeRoutes, { prefix: '/knowledge' });
+  await app.register(certificationRoutes, { prefix: '/certifications' });
+  await app.register(trainingGuidanceRoutes, { prefix: '/ai' });
 
   return app;
 };
