@@ -2,7 +2,7 @@ import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { prisma } from '../utils/prisma';
 import { authMiddleware } from '../middleware/auth';
-import { moderateContent, generateStructuredJSON } from '../utils/aiService';
+import { moderateContent, generateStructuredJSON, AI_MODEL } from '../utils/aiService';
 import { careLogStructuringPrompt } from '../shared/prompts';
 
 interface AuthRequest extends FastifyRequest {
@@ -12,21 +12,6 @@ interface AuthRequest extends FastifyRequest {
 const generateNotesParamsSchema = z.object({
   shiftId: z.string().uuid('Invalid shift ID'),
 });
-
-interface StructuredNote {
-  shiftId: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  totalHours: number;
-  activitiesPerformed: string[];
-  clientConditionNotes: string;
-  mealsPrepared: string[];
-  medicationNotes: string;
-  safetyNotes: string;
-  caregiverNotes: string;
-  espReadySummary: string;
-}
 
 export const notesRoutes = async (app: FastifyInstance) => {
   /**
@@ -88,11 +73,6 @@ export const notesRoutes = async (app: FastifyInstance) => {
         });
       }
 
-      // Check if notes already exist
-      const existing = await prisma.structuredNote.findFirst({
-        where: { shiftId },
-      });
-
       // Build the events text for the prompt
       const eventsText = shift.events
         .map((e, i) => `${i + 1}. [${e.type}] ${e.description || 'No description'} (${new Date(e.createdAt).toLocaleTimeString()})`)
@@ -127,36 +107,29 @@ export const notesRoutes = async (app: FastifyInstance) => {
       });
 
       // Generate structured notes
-      const structuredData = await generateStructuredJSON<StructuredNote>(prompt);
+      const structuredData = await generateStructuredJSON<Record<string, unknown>>(prompt);
 
-      // Save to database (upsert)
-      const note = await prisma.structuredNote.upsert({
-        where: { shiftId },
-        create: {
+      // Save to database — create a new version each time
+      const note = await prisma.structuredNote.create({
+        data: {
           shiftId,
           userId: userId!,
           promptVersion: careLogStructuringPrompt.version,
-          rawInput: eventsText,
-          structuredOutput: structuredData as object,
-        },
-        update: {
-          promptVersion: careLogStructuringPrompt.version,
-          rawInput: eventsText,
-          structuredOutput: structuredData as object,
-          updatedAt: new Date(),
+          modelUsed: AI_MODEL,
+          content: structuredData,
+          isFinal: false,
         },
       });
 
-      return reply.code(existing ? 200 : 201).send({
+      return reply.code(201).send({
         success: true,
         data: {
           note: {
             id: note.id,
             shiftId: note.shiftId,
-            structuredOutput: note.structuredOutput,
+            structuredOutput: note.content,
             promptVersion: note.promptVersion,
             createdAt: note.createdAt.toISOString(),
-            updatedAt: note.updatedAt.toISOString(),
           },
         },
       });
@@ -165,7 +138,7 @@ export const notesRoutes = async (app: FastifyInstance) => {
 
   /**
    * GET /notes/shifts/:shiftId
-   * Retrieve existing structured notes for a shift.
+   * Retrieve the latest structured note for a shift.
    */
   app.get(
     '/shifts/:shiftId',
@@ -176,6 +149,7 @@ export const notesRoutes = async (app: FastifyInstance) => {
 
       const note = await prisma.structuredNote.findFirst({
         where: { shiftId, userId: userId! },
+        orderBy: { createdAt: 'desc' },
       });
 
       if (!note) {
@@ -191,10 +165,9 @@ export const notesRoutes = async (app: FastifyInstance) => {
           note: {
             id: note.id,
             shiftId: note.shiftId,
-            structuredOutput: note.structuredOutput,
+            structuredOutput: note.content,
             promptVersion: note.promptVersion,
             createdAt: note.createdAt.toISOString(),
-            updatedAt: note.updatedAt.toISOString(),
           },
         },
       });

@@ -58,7 +58,7 @@ export const exportsRoutes = async (app: FastifyInstance) => {
       const startDate = new Date(`${weekStart}T00:00:00.000Z`);
       const endDate = new Date(`${weekEnd}T23:59:59.999Z`);
 
-      // Fetch all completed shifts in the date range
+      // Fetch all completed shifts in the date range with their events
       const shifts = await prisma.shift.findMany({
         where: {
           userId: userId!,
@@ -67,7 +67,6 @@ export const exportsRoutes = async (app: FastifyInstance) => {
         },
         include: {
           events: { orderBy: { createdAt: 'asc' } },
-          structuredNote: true,
         },
         orderBy: { startedAt: 'asc' },
       });
@@ -125,15 +124,13 @@ ${events || '  (no events logged)'}`;
       // Generate the weekly summary
       const exportData = await generateStructuredJSON<WeeklyExportOutput>(prompt);
 
-      // Save the weekly export
+      // Save the weekly export — schema uses 'content' field
       const weeklyExport = await prisma.weeklyExport.create({
         data: {
           userId: userId!,
           weekStart: startDate,
           weekEnd: endDate,
-          promptVersion: weeklyExportPrompt.version,
-          rawInput: shiftsData,
-          structuredOutput: exportData as object,
+          content: exportData as object,
         },
       });
 
@@ -144,8 +141,8 @@ ${events || '  (no events logged)'}`;
             id: weeklyExport.id,
             weekStart: weeklyExport.weekStart.toISOString(),
             weekEnd: weeklyExport.weekEnd.toISOString(),
-            structuredOutput: weeklyExport.structuredOutput,
-            promptVersion: weeklyExport.promptVersion,
+            structuredOutput: weeklyExport.content,
+            promptVersion: weeklyExportPrompt.version,
             createdAt: weeklyExport.createdAt.toISOString(),
           },
           summary: exportData,
@@ -177,8 +174,8 @@ ${events || '  (no events logged)'}`;
             id: e.id,
             weekStart: e.weekStart.toISOString(),
             weekEnd: e.weekEnd.toISOString(),
-            structuredOutput: e.structuredOutput,
-            promptVersion: e.promptVersion,
+            structuredOutput: e.content,
+            promptVersion: weeklyExportPrompt.version,
             createdAt: e.createdAt.toISOString(),
           })),
         },
@@ -215,8 +212,8 @@ ${events || '  (no events logged)'}`;
             id: weeklyExport.id,
             weekStart: weeklyExport.weekStart.toISOString(),
             weekEnd: weeklyExport.weekEnd.toISOString(),
-            structuredOutput: weeklyExport.structuredOutput,
-            promptVersion: weeklyExport.promptVersion,
+            structuredOutput: weeklyExport.content,
+            promptVersion: weeklyExportPrompt.version,
             createdAt: weeklyExport.createdAt.toISOString(),
           },
         },
