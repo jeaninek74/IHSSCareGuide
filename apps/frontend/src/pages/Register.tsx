@@ -29,7 +29,8 @@ const Register = () => {
     setLoading(true);
     try {
       await register(email, password, name);
-      navigate('/dashboard');
+      // Redirect new users to onboarding
+      navigate('/onboarding');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
     } finally {
@@ -97,6 +98,11 @@ const Register = () => {
               <Link component={RouterLink} to="/login">
                 Sign in
               </Link>
+            </Typography>
+            <Typography variant="caption" textAlign="center" color="text.secondary">
+              By creating an account, you agree to our{' '}
+              <Link component={RouterLink} to="/terms">Terms of Service</Link>{' '}and{' '}
+              <Link component={RouterLink} to="/privacy">Privacy Policy</Link>.
             </Typography>
           </Stack>
         </CardContent>

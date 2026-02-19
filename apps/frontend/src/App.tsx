@@ -12,14 +12,34 @@ import Incidents from './pages/Incidents';
 import Assistant from './pages/Assistant';
 import Certifications from './pages/Certifications';
 import NotificationSettings from './pages/NotificationSettings';
+import Onboarding from './pages/Onboarding';
+import Terms from './pages/Terms';
+import Privacy from './pages/Privacy';
+import Disclaimer from './pages/Disclaimer';
 
 const App = () => {
   return (
     <Box minHeight="100vh" bgcolor="background.default">
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/disclaimer" element={<Disclaimer />} />
+
+        {/* Onboarding (protected) */}
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute>
+              <Onboarding />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected app routes */}
         <Route
           path="/dashboard"
           element={

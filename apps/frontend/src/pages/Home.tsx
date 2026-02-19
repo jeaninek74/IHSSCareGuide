@@ -12,7 +12,8 @@ import {
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import ScheduleIcon from '@mui/icons-material/Schedule';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { Link, Divider } from '@mui/material';
 import { useAuth } from '../context/AuthContext';
 import ApiStatus from '../components/ApiStatus';
 
@@ -133,6 +134,25 @@ const Home = () => {
           ))}
         </Grid>
       </Container>
+
+      {/* Footer */}
+      <Box sx={{ bgcolor: 'grey.100', py: 4, mt: 4 }}>
+        <Container maxWidth="lg">
+          <Divider sx={{ mb: 3 }} />
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent="center" alignItems="center">
+            <Typography variant="caption" color="text.secondary">
+              &copy; {new Date().getFullYear()} IHSS Caregiver Companion
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>|</Typography>
+            <Link component={RouterLink} to="/terms" variant="caption" color="text.secondary">Terms of Service</Link>
+            <Link component={RouterLink} to="/privacy" variant="caption" color="text.secondary">Privacy Policy</Link>
+            <Link component={RouterLink} to="/disclaimer" variant="caption" color="text.secondary">Disclaimer</Link>
+          </Stack>
+          <Typography variant="caption" color="text.secondary" textAlign="center" display="block" mt={1}>
+            Not affiliated with CDSS, any county IHSS program, or the Electronic Services Portal (ESP).
+          </Typography>
+        </Container>
+      </Box>
     </Box>
   );
 };

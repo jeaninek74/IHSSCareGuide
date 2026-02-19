@@ -14,6 +14,7 @@ import { certificationRoutes } from './routes/certifications';
 import { trainingGuidanceRoutes } from './routes/trainingGuidance';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './plugins/requestLogger';
+import securityHeaders from './plugins/securityHeaders';
 import { prisma } from './utils/prisma';
 
 const PORT = parseInt(process.env.PORT || '4000', 10);
@@ -60,12 +61,22 @@ export const buildApp = async () => {
     secret: process.env.COOKIE_SECRET || process.env.JWT_SECRET || 'change-me-in-production',
   });
 
-  // Rate limiting
+  // Rate limiting — global 200/min, AI endpoints get stricter limits applied per-route
   await app.register(rateLimit, {
-    max: 100,
+    max: 200,
     timeWindow: '1 minute',
     keyGenerator: (request) => request.ip,
+    errorResponseBuilder: () => ({
+      success: false,
+      error: {
+        code: 'RATE_LIMIT_EXCEEDED',
+        message: 'Too many requests. Please wait before trying again.',
+      },
+    }),
   });
+
+  // Security headers
+  await app.register(securityHeaders);
 
   // Request logging plugin
   await app.register(requestLogger);
