@@ -49,18 +49,18 @@ async function createDefaultReminderEvents(certId: string, providerId: string, e
 // ── Schemas ───────────────────────────────────────────────────────────────────
 
 const createCertSchema = z.object({
-  certificationTypeId: z.string().uuid().optional(),
-  customName: z.string().min(1).max(200).optional(),
-  issuedDate: z.string().datetime().optional(),
-  expirationDate: z.string().datetime().optional(),
-  notes: z.string().max(2000).optional(),
+  certificationTypeId: z.string().uuid().nullable().optional(),
+  customName: z.string().min(1).max(200).nullable().optional(),
+  issuedDate: z.string().datetime().nullable().optional(),
+  expirationDate: z.string().datetime().nullable().optional(),
+  notes: z.string().max(2000).nullable().optional(),
 }).refine((d) => d.certificationTypeId || d.customName, {
   message: 'Either certificationTypeId or customName is required',
 });
 
 const updateCertSchema = z.object({
-  certificationTypeId: z.string().uuid().optional(),
-  customName: z.string().min(1).max(200).optional(),
+  certificationTypeId: z.string().uuid().nullable().optional(),
+  customName: z.string().min(1).max(200).nullable().optional(),
   issuedDate: z.string().datetime().optional().nullable(),
   expirationDate: z.string().datetime().optional().nullable(),
   notes: z.string().max(2000).optional().nullable(),
