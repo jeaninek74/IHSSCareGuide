@@ -1,14 +1,17 @@
-import NavBar from '../components/NavBar';
 import { useState, useEffect } from 'react';
 import {
   Box, Container, Typography, Button, Card, CardContent,
   Stack, TextField, Alert, CircularProgress, Chip, Divider,
   Accordion, AccordionSummary, AccordionDetails, List, ListItem, ListItemText,
+  IconButton, Tooltip,
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import PrintIcon from '@mui/icons-material/Print';
+import NavBar from '../components/NavBar';
 import { incidentsApi, Incident } from '../services/apiClient';
 
 function formatDateTime(iso: string) {
@@ -32,8 +35,44 @@ export default function Incidents() {
   const [description, setDescription] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [structuring, setStructuring] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const handleCopyIncident = async (incident: Incident, structured: IncidentStructured) => {
+    const text = [
+      `INCIDENT REPORT — ${formatDateTime(incident.createdAt)}`,
+      '',
+      `DESCRIPTION:\n${incident.description}`,
+      '',
+      `SUMMARY:\n${structured.summary}`,
+      '',
+      `TIMELINE:\n${structured.timeline}`,
+      structured.involvedParties?.length ? `\nINVOLVED PARTIES:\n${structured.involvedParties.map((p) => `• ${p}`).join('\n')}` : '',
+      structured.actionsTaken?.length ? `\nACTIONS TAKEN:\n${structured.actionsTaken.map((a) => `• ${a}`).join('\n')}` : '',
+      '',
+      `RECOMMENDED FOLLOW-UP:\n${structured.recommendedFollowUp}`,
+    ].filter(Boolean).join('\n');
+    await navigator.clipboard.writeText(text);
+    setCopiedId(incident.id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handlePrintIncident = (incident: Incident, structured: IncidentStructured) => {
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`<html><head><title>Incident Report</title><style>body{font-family:sans-serif;padding:24px;max-width:700px;margin:auto}h2,h3{margin-bottom:4px}p,li{font-size:14px}ul{margin:4px 0 12px 16px}</style></head><body>`);
+    win.document.write(`<h2>Incident Report</h2><p><strong>Date:</strong> ${formatDateTime(incident.createdAt)}</p>`);
+    win.document.write(`<h3>Description</h3><p>${incident.description}</p>`);
+    win.document.write(`<h3>Summary</h3><p>${structured.summary}</p>`);
+    win.document.write(`<h3>Timeline</h3><p>${structured.timeline}</p>`);
+    if (structured.involvedParties?.length) win.document.write(`<h3>Involved Parties</h3><ul>${structured.involvedParties.map((p) => `<li>${p}</li>`).join('')}</ul>`);
+    if (structured.actionsTaken?.length) win.document.write(`<h3>Actions Taken</h3><ul>${structured.actionsTaken.map((a) => `<li>${a}</li>`).join('')}</ul>`);
+    win.document.write(`<h3>Recommended Follow-Up</h3><p>${structured.recommendedFollowUp}</p>`);
+    win.document.write(`</body></html>`);
+    win.document.close();
+    win.print();
+  };
 
   const loadIncidents = () => {
     incidentsApi.getAll()
@@ -176,10 +215,24 @@ export default function Incidents() {
                         <Divider sx={{ my: 1.5 }} />
                         <Accordion disableGutters elevation={0} sx={{ bgcolor: 'grey.50', borderRadius: 1 }}>
                           <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 2 }}>
-                            <Typography variant="body2" fontWeight={600}>
-                              <AutoAwesomeIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle', color: 'primary.main' }} />
-                              AI Structured Report
-                            </Typography>
+                            <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%" pr={1}>
+                              <Typography variant="body2" fontWeight={600}>
+                                <AutoAwesomeIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle', color: 'primary.main' }} />
+                                AI Structured Report
+                              </Typography>
+                              <Stack direction="row" spacing={0.5} onClick={(e) => e.stopPropagation()}>
+                                <Tooltip title={copiedId === incident.id ? 'Copied!' : 'Copy report'}>
+                                  <IconButton size="small" onClick={() => handleCopyIncident(incident, structured)}>
+                                    <ContentCopyIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                                <Tooltip title="Print report">
+                                  <IconButton size="small" onClick={() => handlePrintIncident(incident, structured)}>
+                                    <PrintIcon fontSize="small" />
+                                  </IconButton>
+                                </Tooltip>
+                              </Stack>
+                            </Stack>
                           </AccordionSummary>
                           <AccordionDetails sx={{ px: 2, pt: 0 }}>
                             <Stack spacing={1.5}>

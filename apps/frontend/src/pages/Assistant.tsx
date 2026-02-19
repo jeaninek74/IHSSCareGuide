@@ -59,7 +59,7 @@ const SUGGESTED_QUESTIONS = [
 
 // ── API ───────────────────────────────────────────────────────────────────────
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 async function askAssistant(question: string): Promise<AssistantAnswer> {
   const res = await fetch(`${API_BASE}/knowledge/ask`, {

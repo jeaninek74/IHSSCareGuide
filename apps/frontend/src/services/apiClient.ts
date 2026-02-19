@@ -87,6 +87,7 @@ export interface Shift {
   status: 'active' | 'completed';
   startedAt: string;
   endedAt: string | null;
+  recipientName: string | null;
   createdAt: string;
   updatedAt: string;
   events: ShiftEvent[];
@@ -103,8 +104,11 @@ export interface ShiftsResponse {
 }
 
 export const shiftsApi = {
-  start: () =>
-    request<ShiftResponse>('/shifts/start', { method: 'POST' }),
+  start: (recipientName?: string) =>
+    request<ShiftResponse>('/shifts/start', {
+      method: 'POST',
+      body: JSON.stringify({ recipientName }),
+    }),
 
   end: (shiftId: string) =>
     request<ShiftResponse>(`/shifts/${shiftId}/end`, { method: 'POST' }),

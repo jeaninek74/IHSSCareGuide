@@ -4,13 +4,15 @@ import {
   Box, Container, Typography, Button, Card, CardContent,
   Stack, TextField, Select, MenuItem, FormControl, InputLabel,
   Chip, Alert, CircularProgress, List, ListItem, ListItemText,
-  Accordion, AccordionSummary, AccordionDetails, Divider,
+  Accordion, AccordionSummary, AccordionDetails, Divider, IconButton, Tooltip,
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import StopIcon from '@mui/icons-material/Stop';
 import AddIcon from '@mui/icons-material/Add';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import PrintIcon from '@mui/icons-material/Print';
 import { shiftsApi, notesApi, Shift, StructuredNote } from '../services/apiClient';
 
 const EVENT_TYPES = [
@@ -38,6 +40,95 @@ function duration(start: string, end: string | null) {
   return h > 0 ? `${h}h ${m}m` : `${m}m`;
 }
 
+// Render structured note output as readable fields
+function StructuredNoteView({ note }: { note: StructuredNote }) {
+  const out = note.structuredOutput as Record<string, unknown>;
+  const [copied, setCopied] = useState(false);
+
+  const toText = () => {
+    const lines: string[] = [];
+    for (const [key, val] of Object.entries(out)) {
+      const label = key.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
+      if (Array.isArray(val)) {
+        lines.push(`${label}:`);
+        (val as string[]).forEach((v) => lines.push(`  • ${v}`));
+      } else if (val) {
+        lines.push(`${label}:\n${val}`);
+      }
+    }
+    return lines.join('\n\n');
+  };
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(toText());
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handlePrint = () => {
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`<html><head><title>Care Notes</title><style>body{font-family:sans-serif;padding:24px;max-width:700px;margin:auto}h3{margin-bottom:4px}p,li{font-size:14px}ul{margin:4px 0 12px 16px}</style></head><body>`);
+    win.document.write(`<h2>AI-Generated Care Notes</h2>`);
+    for (const [key, val] of Object.entries(out)) {
+      const label = key.replace(/([A-Z])/g, ' $1').trim();
+      win.document.write(`<h3>${label}</h3>`);
+      if (Array.isArray(val)) {
+        win.document.write(`<ul>${(val as string[]).map((v) => `<li>${v}</li>`).join('')}</ul>`);
+      } else {
+        win.document.write(`<p>${val}</p>`);
+      }
+    }
+    win.document.write(`</body></html>`);
+    win.document.close();
+    win.print();
+  };
+
+  return (
+    <Box>
+      <Stack direction="row" justifyContent="flex-end" spacing={1} mb={1}>
+        <Tooltip title={copied ? 'Copied!' : 'Copy notes'}>
+          <IconButton size="small" onClick={handleCopy}>
+            <ContentCopyIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Print notes">
+          <IconButton size="small" onClick={handlePrint}>
+            <PrintIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Stack>
+      <Stack spacing={1.5}>
+        {Object.entries(out).map(([key, val]) => {
+          if (!val) return null;
+          const label = key.replace(/([A-Z])/g, ' $1').toUpperCase().trim();
+          return (
+            <Box key={key}>
+              <Typography variant="caption" fontWeight={700} color="text.secondary" display="block">
+                {label}
+              </Typography>
+              {Array.isArray(val) ? (
+                <List dense disablePadding>
+                  {(val as string[]).map((v, i) => (
+                    <ListItem key={i} disablePadding sx={{ pl: 1 }}>
+                      <ListItemText primary={`• ${v}`} primaryTypographyProps={{ variant: 'body2' }} />
+                    </ListItem>
+                  ))}
+                </List>
+              ) : (
+                <Typography variant="body2">{String(val)}</Typography>
+              )}
+            </Box>
+          );
+        })}
+        <Typography variant="caption" color="text.disabled">
+          Prompt v{note.promptVersion}
+        </Typography>
+      </Stack>
+    </Box>
+  );
+}
+
 export default function Shifts() {
   const [activeShift, setActiveShift] = useState<Shift | null>(null);
   const [pastShifts, setPastShifts] = useState<Shift[]>([]);
@@ -50,6 +141,7 @@ export default function Shifts() {
   const [addingEvent, setAddingEvent] = useState(false);
   const [generatingNotes, setGeneratingNotes] = useState<string | null>(null);
   const [shiftNotes, setShiftNotes] = useState<Record<string, StructuredNote>>({});
+  const [recipientName, setRecipientName] = useState('');
 
   const loadData = async () => {
     try {
@@ -72,8 +164,9 @@ export default function Shifts() {
     setActionLoading(true);
     setError('');
     try {
-      const res = await shiftsApi.start();
+      const res = await shiftsApi.start(recipientName.trim() || undefined);
       setActiveShift(res.data.shift);
+      setRecipientName('');
       setSuccess('Shift started.');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to start shift.');
@@ -156,6 +249,14 @@ export default function Shifts() {
             <Typography variant="body2" color="text.secondary" mb={2}>
               Start a shift to begin logging care activities.
             </Typography>
+            <TextField
+              size="small"
+              label="Care Recipient Name (optional)"
+              value={recipientName}
+              onChange={(e) => setRecipientName(e.target.value)}
+              placeholder="e.g. John Smith"
+              sx={{ mb: 2, maxWidth: 320, display: 'block' }}
+            />
             <Button
               variant="contained"
               startIcon={<PlayArrowIcon />}
@@ -172,7 +273,9 @@ export default function Shifts() {
           <CardContent>
             <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
               <Box>
-                <Typography variant="h6" fontWeight={600}>Active Shift</Typography>
+                <Typography variant="h6" fontWeight={600}>
+                  Active Shift{activeShift.recipientName ? ` — ${activeShift.recipientName}` : ''}
+                </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Started: {formatTime(activeShift.startedAt)} · Duration: {duration(activeShift.startedAt, null)}
                 </Typography>
@@ -256,7 +359,7 @@ export default function Shifts() {
                 <Stack direction="row" justifyContent="space-between" alignItems="flex-start" mb={1}>
                   <Box>
                     <Typography variant="subtitle1" fontWeight={600}>
-                      {formatDate(shift.startedAt)}
+                      {formatDate(shift.startedAt)}{shift.recipientName ? ` — ${shift.recipientName}` : ''}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
                       {formatTime(shift.startedAt)} – {shift.endedAt ? formatTime(shift.endedAt) : '?'} · {duration(shift.startedAt, shift.endedAt)}
@@ -272,24 +375,22 @@ export default function Shifts() {
                       onClick={() => handleGenerateNotes(shift.id)}
                       disabled={generatingNotes === shift.id || shift.events.length === 0}
                     >
-                      {generatingNotes === shift.id ? 'Generating...' : shiftNotes[shift.id] ? 'Regenerate Notes' : 'Generate Notes'}
+                      {generatingNotes === shift.id ? 'Generating...' : shiftNotes[shift.id] ? 'Regenerate' : 'Generate Notes'}
                     </Button>
                   </Stack>
                 </Stack>
 
-                {/* Show generated notes if available */}
+                {/* Show generated notes as structured fields */}
                 {shiftNotes[shift.id] && (
                   <Accordion sx={{ mt: 1 }}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                       <Typography variant="body2" fontWeight={600}>
                         <AutoAwesomeIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle', color: 'secondary.main' }} />
-                        AI-Generated Care Notes (v{shiftNotes[shift.id].promptVersion})
+                        AI-Generated Care Notes
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <Box component="pre" sx={{ fontSize: 12, whiteSpace: 'pre-wrap', wordBreak: 'break-word', bgcolor: 'grey.50', p: 1.5, borderRadius: 1 }}>
-                        {JSON.stringify(shiftNotes[shift.id].structuredOutput, null, 2)}
-                      </Box>
+                      <StructuredNoteView note={shiftNotes[shift.id]} />
                     </AccordionDetails>
                   </Accordion>
                 )}
