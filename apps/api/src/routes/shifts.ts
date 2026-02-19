@@ -37,8 +37,9 @@ export const shiftRoutes = async (app: FastifyInstance) => {
   app.addHook('preHandler', authMiddleware);
 
   // POST /shifts/start — start a new shift
-  app.post('/start', async (request: FastifyRequest, reply: FastifyReply) => {
+  app.post('/start', async (request: FastifyRequest<{ Body: { recipientName?: string } }>, reply: FastifyReply) => {
     const userId = getUserId(request);
+    const { recipientName } = (request.body as { recipientName?: string }) || {};
 
     // Check for an already-active shift
     const active = await prisma.shift.findFirst({
@@ -55,7 +56,7 @@ export const shiftRoutes = async (app: FastifyInstance) => {
     }
 
     const shift = await prisma.shift.create({
-      data: { userId },
+      data: { userId, ...(recipientName ? { recipientName } : {}) },
       include: { events: true },
     });
 
