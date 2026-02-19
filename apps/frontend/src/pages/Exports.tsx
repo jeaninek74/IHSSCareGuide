@@ -68,7 +68,7 @@ export default function Exports() {
     setLatestSummary(null);
     try {
       const res = await exportsApi.generateWeekly(weekStart, weekEnd);
-      setLatestSummary(res.data.summary as WeeklySummary);
+      setLatestSummary(res.data.summary as unknown as WeeklySummary);
       setExports((prev) => [res.data.export, ...prev]);
       setSuccess('Weekly summary generated successfully.');
     } catch (err: unknown) {

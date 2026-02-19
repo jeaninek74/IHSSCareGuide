@@ -116,7 +116,7 @@ export const notesRoutes = async (app: FastifyInstance) => {
           userId: userId!,
           promptVersion: careLogStructuringPrompt.version,
           modelUsed: AI_MODEL,
-          content: structuredData,
+          content: structuredData as object as import('@prisma/client').Prisma.InputJsonValue,
           isFinal: false,
         },
       });
