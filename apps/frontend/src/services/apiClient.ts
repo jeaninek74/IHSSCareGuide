@@ -146,3 +146,46 @@ export const incidentsApi = {
   getOne: (incidentId: string) =>
     request<{ success: boolean; data: { incident: Incident } }>(`/incidents/${incidentId}`),
 };
+
+// ── Notes ─────────────────────────────────────────────────────────────────────
+
+export interface StructuredNote {
+  id: string;
+  shiftId: string;
+  structuredOutput: Record<string, unknown>;
+  promptVersion: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const notesApi = {
+  generate: (shiftId: string) =>
+    request<{ success: boolean; data: { note: StructuredNote } }>(`/notes/shifts/${shiftId}/generate`, {
+      method: 'POST',
+    }),
+  getForShift: (shiftId: string) =>
+    request<{ success: boolean; data: { note: StructuredNote } }>(`/notes/shifts/${shiftId}`),
+};
+
+// ── Exports ───────────────────────────────────────────────────────────────────
+
+export interface WeeklyExport {
+  id: string;
+  weekStart: string;
+  weekEnd: string;
+  structuredOutput: Record<string, unknown>;
+  promptVersion: string;
+  createdAt: string;
+}
+
+export const exportsApi = {
+  generateWeekly: (weekStart: string, weekEnd: string) =>
+    request<{ success: boolean; data: { export: WeeklyExport; summary: Record<string, unknown> } }>('/exports/weekly', {
+      method: 'POST',
+      body: JSON.stringify({ weekStart, weekEnd }),
+    }),
+  getAll: () =>
+    request<{ success: boolean; data: { exports: WeeklyExport[] } }>('/exports'),
+  getOne: (exportId: string) =>
+    request<{ success: boolean; data: { export: WeeklyExport } }>(`/exports/${exportId}`),
+};
