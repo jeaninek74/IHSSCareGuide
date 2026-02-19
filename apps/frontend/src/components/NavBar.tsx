@@ -68,7 +68,7 @@ const NavBar = () => {
             }}
             onClick={() => navigate(user ? '/dashboard' : '/')}
           >
-            IHSS Companion
+            IHSS Care Guide
           </Typography>
 
           {/* Desktop nav links */}
@@ -217,7 +217,7 @@ const NavBar = () => {
 
         <Box sx={{ p: 2, mt: 'auto' }}>
           <Typography variant="caption" color="text.secondary">
-            IHSS Companion v1.0.0
+            IHSS Care Guide v1.0.0
           </Typography>
         </Box>
       </Drawer>
