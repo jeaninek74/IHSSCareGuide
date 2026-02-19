@@ -48,7 +48,7 @@ const Register = () => {
                 Create Account
               </Typography>
               <Typography variant="body2" color="text.secondary" mt={1}>
-                IHSS Caregiver Companion
+                IHSS Care Guide
               </Typography>
             </Box>
             {error && <Alert severity="error">{error}</Alert>}

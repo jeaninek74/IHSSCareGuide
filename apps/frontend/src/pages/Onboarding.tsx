@@ -53,7 +53,7 @@ export default function Onboarding() {
           <Box textAlign="center">
             <CheckCircleOutlineIcon sx={{ fontSize: 64, color: 'primary.main', mb: 2 }} />
             <Typography variant="h5" fontWeight={700} gutterBottom>
-              Welcome to IHSS Caregiver Companion
+              Welcome to IHSS Care Guide
             </Typography>
             <Typography color="text.secondary" sx={{ mb: 3 }}>
               Hello{user?.email ? `, ${user.email.split('@')[0]}` : ''}! This quick setup will help you understand
@@ -203,7 +203,7 @@ export default function Onboarding() {
               </Typography>
             </Box>
             <Alert severity="success">
-              Welcome to IHSS Caregiver Companion. Let's get started!
+              Welcome to IHSS Care Guide. Let's get started!
             </Alert>
           </Box>
         )}

@@ -31,7 +31,7 @@ async function sendReminderEmail(
   const html = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
       <div style="background: #1976d2; color: white; padding: 20px 24px; border-radius: 8px 8px 0 0;">
-        <h2 style="margin: 0; font-size: 20px;">IHSS Caregiver Companion</h2>
+        <h2 style="margin: 0; font-size: 20px;">IHSS Care Guide</h2>
         <p style="margin: 4px 0 0; opacity: 0.9; font-size: 14px;">Certification Reminder</p>
       </div>
       <div style="background: #fff; border: 1px solid #e0e0e0; border-top: none; padding: 24px; border-radius: 0 0 8px 8px;">
@@ -49,9 +49,9 @@ async function sendReminderEmail(
             </td>
           </tr>
         </table>
-        <p><strong>What to do next:</strong> Log in to your IHSS Caregiver Companion account to update your certification details and ensure your records are current.</p>
+        <p><strong>What to do next:</strong> Log in to your IHSS Care Guide account to update your certification details and ensure your records are current.</p>
         <p style="margin-bottom: 0; color: #666; font-size: 12px; padding-top: 16px; border-top: 1px solid #eee;">
-          This reminder was sent automatically by IHSS Caregiver Companion. Always verify certification requirements with your county IHSS office or official IHSS resources. This app is not affiliated with CDSS or any county IHSS program.
+          This reminder was sent automatically by IHSS Care Guide. Always verify certification requirements with your county IHSS office or official IHSS resources. This app is not affiliated with CDSS or any county IHSS program.
         </p>
       </div>
     </div>

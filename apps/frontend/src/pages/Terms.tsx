@@ -16,13 +16,13 @@ export default function Terms() {
         <Box sx={{ '& h6': { mt: 4, mb: 1, fontWeight: 700 }, '& p': { mb: 2, lineHeight: 1.8 } }}>
           <Typography variant="h6">1. Acceptance of Terms</Typography>
           <Typography>
-            By accessing or using the IHSS Caregiver Companion application ("the App"), you agree to be bound
+            By accessing or using the IHSS Care Guide application ("the App"), you agree to be bound
             by these Terms of Service. If you do not agree, please do not use the App.
           </Typography>
 
           <Typography variant="h6">2. Description of Service</Typography>
           <Typography>
-            IHSS Caregiver Companion is a workflow support tool designed to help In-Home Supportive Services
+            IHSS Care Guide is a workflow support tool designed to help In-Home Supportive Services
             (IHSS) caregivers organize shift documentation, generate structured care notes, and access
             general guidance about IHSS and ESP workflows. The App is a companion tool only and does not
             replace any official IHSS or Electronic Services Portal (ESP) system.
@@ -66,7 +66,7 @@ export default function Terms() {
 
           <Typography variant="h6">8. Limitation of Liability</Typography>
           <Typography>
-            To the fullest extent permitted by law, IHSS Caregiver Companion and its operators shall not be
+            To the fullest extent permitted by law, IHSS Care Guide and its operators shall not be
             liable for any indirect, incidental, special, or consequential damages arising from your use of
             the App, including any errors in AI-generated content or missed compliance deadlines.
           </Typography>

@@ -16,7 +16,7 @@ export default function Disclaimer() {
 
         <Alert severity="warning" icon={<WarningAmberIcon />} sx={{ mb: 4 }}>
           <Typography fontWeight={600}>
-            IHSS Caregiver Companion is a workflow support tool only. It is not affiliated with, endorsed
+            IHSS Care Guide is a workflow support tool only. It is not affiliated with, endorsed
             by, or operated by any official IHSS program, the California Department of Social Services
             (CDSS), or the Electronic Services Portal (ESP).
           </Typography>
@@ -64,7 +64,7 @@ export default function Disclaimer() {
 
           <Typography variant="h6">Limitation of Liability</Typography>
           <Typography>
-            The operators of IHSS Caregiver Companion are not liable for any consequences arising from
+            The operators of IHSS Care Guide are not liable for any consequences arising from
             reliance on information provided by this App, including but not limited to missed deadlines,
             compliance failures, or errors in documentation. Use of this App is at your own risk.
           </Typography>
