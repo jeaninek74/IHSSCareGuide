@@ -42,7 +42,7 @@ const FEATURES = [
 ];
 
 const HOW_IT_WORKS = [
-  { step: '1', text: 'Create a free account in 30 seconds.' },
+  { step: '1', text: 'Create an account in 30 seconds.' },
   { step: '2', text: 'Start a shift and log what you do as you care.' },
   { step: '3', text: 'End the shift — the AI writes your notes for you.' },
   { step: '4', text: 'Export your weekly report whenever you need it.' },
@@ -89,7 +89,7 @@ const Home = () => {
               variant="body1"
               sx={{ opacity: 0.8, maxWidth: 520, fontSize: '1.05rem' }}
             >
-              IHSS Care Guide gives California caregivers one free app to track shifts, write notes, report incidents, and get answers.
+              IHSS Care Guide gives California caregivers one app to track shifts, write notes, report incidents, and get answers.
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mt={2}>
               {isAuthenticated ? (
@@ -127,7 +127,7 @@ const Home = () => {
                       '&:hover': { bgcolor: '#e3f2fd' },
                     }}
                   >
-                    Start Free — No Card Needed
+                    Get Started
                   </Button>
                   <Button
                     variant="outlined"
@@ -267,7 +267,7 @@ const Home = () => {
                   '&:hover': { bgcolor: '#e3f2fd' },
                 }}
               >
-                Create Your Free Account
+                Create Your Account
               </Button>
             </Box>
           )}
@@ -279,9 +279,9 @@ const Home = () => {
         <Container maxWidth="md">
           <Grid container spacing={4} textAlign="center">
             {[
-              { stat: '100% Free', label: 'No subscription. No hidden fees. Ever.' },
               { stat: 'AI-Powered', label: 'Notes written in seconds, not minutes.' },
               { stat: 'IHSS-Specific', label: 'Built for California IHSS caregivers.' },
+              { stat: 'Easy to Use', label: 'No training required. Start in under a minute.' },
             ].map((item) => (
               <Grid item xs={12} sm={4} key={item.stat}>
                 <Typography
@@ -338,7 +338,7 @@ const Home = () => {
                 '&:hover': { bgcolor: '#f3e5f5' },
               }}
             >
-              Get Started Free
+              Get Started
             </Button>
           </Container>
         </Box>
