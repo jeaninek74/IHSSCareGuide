@@ -300,6 +300,143 @@ const Home = () => {
         </Container>
       </Box>
 
+      {/* PRICING */}
+      <Box sx={{ bgcolor: '#f9f9f9', py: { xs: 8, md: 10 }, px: 2 }}>
+        <Container maxWidth="md">
+          <Typography
+            variant="h3"
+            textAlign="center"
+            fontWeight={800}
+            mb={2}
+            sx={{ fontSize: { xs: '1.9rem', md: '2.5rem' } }}
+          >
+            Simple, Transparent Pricing
+          </Typography>
+          <Typography
+            variant="body1"
+            textAlign="center"
+            color="text.secondary"
+            mb={7}
+            maxWidth={520}
+            mx="auto"
+            fontSize="1.05rem"
+          >
+            Start with a 7-day trial — no credit card required. Cancel anytime.
+          </Typography>
+          <Grid container spacing={4} justifyContent="center">
+            {/* MONTHLY */}
+            <Grid item xs={12} sm={6} md={5}>
+              <Box
+                sx={{
+                  bgcolor: 'white',
+                  borderRadius: 4,
+                  p: 5,
+                  height: '100%',
+                  boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
+                  border: '2px solid #e0e0e0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                }}
+              >
+                <Typography variant="overline" sx={{ color: '#1976d2', fontWeight: 700, letterSpacing: 2 }}>
+                  Monthly
+                </Typography>
+                <Typography variant="h2" fontWeight={900} sx={{ mt: 1, mb: 0, color: '#1565c0', fontSize: { xs: '3rem', md: '3.5rem' } }}>
+                  $10
+                </Typography>
+                <Typography variant="body2" color="text.secondary" mb={3}>
+                  per month
+                </Typography>
+                <Stack spacing={1.5} mb={4} width="100%" alignItems="flex-start">
+                  {['Full access to all features', 'AI-generated care notes', 'Incident reporting', 'Weekly exports', 'Certification reminders', 'IHSS AI Assistant'].map(f => (
+                    <Box key={f} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#1976d2', flexShrink: 0 }} />
+                      <Typography variant="body2" color="text.secondary">{f}</Typography>
+                    </Box>
+                  ))}
+                </Stack>
+                {!isAuthenticated && (
+                  <Button
+                    variant="outlined"
+                    size="large"
+                    fullWidth
+                    onClick={() => navigate('/register')}
+                    sx={{ borderColor: '#1976d2', color: '#1976d2', fontWeight: 700, borderRadius: 3, py: 1.5, '&:hover': { bgcolor: '#e3f2fd' } }}
+                  >
+                    Start 7-Day Trial
+                  </Button>
+                )}
+              </Box>
+            </Grid>
+            {/* ANNUAL */}
+            <Grid item xs={12} sm={6} md={5}>
+              <Box
+                sx={{
+                  bgcolor: '#1976d2',
+                  borderRadius: 4,
+                  p: 5,
+                  height: '100%',
+                  boxShadow: '0 4px 24px rgba(25,118,210,0.3)',
+                  border: '2px solid #1565c0',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  position: 'relative',
+                }}
+              >
+                <Box
+                  sx={{
+                    position: 'absolute',
+                    top: -14,
+                    bgcolor: '#e65100',
+                    color: 'white',
+                    px: 2.5,
+                    py: 0.5,
+                    borderRadius: 10,
+                    fontSize: '0.75rem',
+                    fontWeight: 800,
+                    letterSpacing: 1,
+                  }}
+                >
+                  BEST VALUE — SAVE 29%
+                </Box>
+                <Typography variant="overline" sx={{ color: 'rgba(255,255,255,0.8)', fontWeight: 700, letterSpacing: 2 }}>
+                  Annual
+                </Typography>
+                <Typography variant="h2" fontWeight={900} sx={{ mt: 1, mb: 0, color: 'white', fontSize: { xs: '3rem', md: '3.5rem' } }}>
+                  $85
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.75)' }} mb={3}>
+                  per year — only $7.08/mo
+                </Typography>
+                <Stack spacing={1.5} mb={4} width="100%" alignItems="flex-start">
+                  {['Full access to all features', 'AI-generated care notes', 'Incident reporting', 'Weekly exports', 'Certification reminders', 'IHSS AI Assistant'].map(f => (
+                    <Box key={f} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.8)', flexShrink: 0 }} />
+                      <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>{f}</Typography>
+                    </Box>
+                  ))}
+                </Stack>
+                {!isAuthenticated && (
+                  <Button
+                    variant="contained"
+                    size="large"
+                    fullWidth
+                    onClick={() => navigate('/register')}
+                    sx={{ bgcolor: 'white', color: '#1565c0', fontWeight: 800, borderRadius: 3, py: 1.5, '&:hover': { bgcolor: '#e3f2fd' } }}
+                  >
+                    Start 7-Day Trial
+                  </Button>
+                )}
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+
       {/* FINAL CTA */}
       {!isAuthenticated && (
         <Box
