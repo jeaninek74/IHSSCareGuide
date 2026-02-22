@@ -67,8 +67,8 @@ const Home = () => {
         <Container maxWidth="md">
           <Stack spacing={4} alignItems="center" textAlign="center">
             <Typography
-              variant="h6"
-              sx={{ opacity: 0.9, letterSpacing: 4, fontSize: { xs: '1rem', md: '1.25rem' }, fontWeight: 700, textTransform: 'uppercase' }}
+              variant="h4"
+              sx={{ opacity: 0.95, letterSpacing: 3, fontSize: { xs: '1.4rem', md: '1.9rem' }, fontWeight: 800, textTransform: 'uppercase' }}
             >
               In-Home Supportive Services
             </Typography>
