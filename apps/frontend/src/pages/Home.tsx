@@ -42,6 +42,57 @@ const FEATURES = [
   },
 ];
 
+const TESTIMONIALS = [
+  {
+    name: 'Maria T.',
+    role: 'IHSS Caregiver, Los Angeles County',
+    quote:
+      'I used to spend my evenings writing up notes from memory. Now I just log things as I go and everything is ready when I end my shift. It has saved me so much time.',
+    initials: 'MT',
+    color: '#1565c0',
+  },
+  {
+    name: 'Darnell W.',
+    role: 'IHSS Provider, San Bernardino County',
+    quote:
+      'The incident report feature is a lifesaver. I had a fall situation and was able to document everything properly in minutes. My coordinator was impressed with how detailed it was.',
+    initials: 'DW',
+    color: '#6a1b9a',
+  },
+  {
+    name: 'Rosa M.',
+    role: 'IHSS Caregiver, Riverside County',
+    quote:
+      'I love that it reminds me about my certifications. I almost missed my renewal last year. Now I get reminders 30 days out and I never have to worry about it.',
+    initials: 'RM',
+    color: '#00695c',
+  },
+  {
+    name: 'James K.',
+    role: 'IHSS Provider, Orange County',
+    quote:
+      'The weekly export is exactly what I needed. I can see all my hours at a glance and it makes filling out my ESP timesheet so much easier every week.',
+    initials: 'JK',
+    color: '#e65100',
+  },
+  {
+    name: 'Linda P.',
+    role: 'IHSS Caregiver, San Diego County',
+    quote:
+      'I had so many questions about my rights as a provider. The knowledge assistant answered everything clearly and even told me where to find the official information.',
+    initials: 'LP',
+    color: '#c62828',
+  },
+  {
+    name: 'Angela R.',
+    role: 'IHSS Provider, Sacramento County',
+    quote:
+      'Simple, clean, and actually built for caregivers. I recommended it to everyone in my support group. It just works.',
+    initials: 'AR',
+    color: '#283593',
+  },
+];
+
 const HOW_IT_WORKS = [
   { step: '1', text: 'Create an account in 30 seconds.' },
   { step: '2', text: 'Start a shift and log what you do as you care.' },
@@ -484,6 +535,83 @@ const Home = () => {
               </Button>
             </Box>
           )}
+        </Container>
+      </Box>
+
+      {/* TESTIMONIALS */}
+      <Box sx={{ bgcolor: '#f9f9f9', py: { xs: 8, md: 10 }, px: 2 }}>
+        <Container maxWidth="lg">
+          <Typography
+            variant="h3"
+            textAlign="center"
+            fontWeight={800}
+            mb={2}
+            sx={{ fontSize: { xs: '1.9rem', md: '2.5rem' } }}
+          >
+            What Caregivers Are Saying
+          </Typography>
+          <Typography
+            variant="body1"
+            textAlign="center"
+            color="text.secondary"
+            mb={7}
+            maxWidth={520}
+            mx="auto"
+            fontSize="1.05rem"
+          >
+            Real feedback from IHSS caregivers and providers across California.
+          </Typography>
+          <Grid container spacing={3}>
+            {TESTIMONIALS.map((t) => (
+              <Grid item xs={12} sm={6} md={4} key={t.name}>
+                <Box
+                  sx={{
+                    bgcolor: 'white',
+                    borderRadius: 4,
+                    p: 4,
+                    height: '100%',
+                    boxShadow: '0 2px 12px rgba(0,0,0,0.07)',
+                    borderTop: `4px solid ${t.color}`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 2,
+                  }}
+                >
+                  <Typography
+                    variant="body1"
+                    color="text.secondary"
+                    lineHeight={1.75}
+                    sx={{ fontStyle: 'italic', flex: 1 }}
+                  >
+                    "{t.quote}"
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
+                    <Box
+                      sx={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: '50%',
+                        bgcolor: t.color,
+                        color: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: 800,
+                        fontSize: '0.9rem',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {t.initials}
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" fontWeight={700}>{t.name}</Typography>
+                      <Typography variant="caption" color="text.secondary">{t.role}</Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
         </Container>
       </Box>
 
