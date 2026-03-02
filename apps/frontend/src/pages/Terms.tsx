@@ -85,7 +85,7 @@ export default function Terms() {
 
           <Typography variant="h6">11. Contact</Typography>
           <Typography>
-            For questions about these Terms, please contact us at support@ihsscareguide.com.
+            For questions about these Terms, please reach out through the App.
           </Typography>
         </Box>
 

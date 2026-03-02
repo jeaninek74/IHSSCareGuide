@@ -1,4 +1,5 @@
-import { Box, Button, Container, Divider, Grid, Link, Stack, Typography } from '@mui/material';
+import { useState } from 'react';
+import { Box, Button, Card, CardContent, Chip, Container, Divider, Grid, Link, Stack, Typography } from '@mui/material';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -48,6 +49,191 @@ const HOW_IT_WORKS = [
   { step: '4', text: 'Export your weekly report whenever you need it.' },
 ];
 
+// ── Interactive Demo Component ────────────────────────────────────────────────
+const DEMO_TABS = [
+  {
+    label: 'Shift Tracking',
+    color: '#1565c0',
+    screen: {
+      title: 'Active Shift',
+      badge: 'LIVE',
+      badgeColor: '#2e7d32',
+      lines: [
+        { label: 'Care Recipient', value: 'Maria G.' },
+        { label: 'Started', value: '9:00 AM' },
+        { label: 'Duration', value: '2h 14m' },
+      ],
+      events: ['Prepared breakfast — oatmeal and juice', 'Assisted with morning medications', 'Personal hygiene assistance'],
+      cta: 'End Shift & Generate Notes',
+    },
+  },
+  {
+    label: 'AI Care Notes',
+    color: '#6a1b9a',
+    screen: {
+      title: 'AI-Generated Care Note',
+      badge: 'AI',
+      badgeColor: '#6a1b9a',
+      lines: [
+        { label: 'Date', value: 'Feb 19, 2026' },
+        { label: 'Duration', value: '2 hrs 14 min' },
+        { label: 'Recipient', value: 'Maria G.' },
+      ],
+      events: [
+        'Caregiver prepared a nutritious breakfast and assisted with morning medications as prescribed.',
+        'Personal hygiene assistance provided. Client was cooperative and in good spirits throughout the shift.',
+      ],
+      cta: 'Copy Note',
+    },
+  },
+  {
+    label: 'Incident Reports',
+    color: '#c62828',
+    screen: {
+      title: 'AI Structured Report',
+      badge: 'STRUCTURED',
+      badgeColor: '#c62828',
+      lines: [
+        { label: 'Date', value: 'Feb 19, 2026' },
+        { label: 'Type', value: 'Fall — No Injury' },
+        { label: 'Status', value: 'Documented' },
+      ],
+      events: [
+        'Client lost balance transferring from bed to wheelchair. Caregiver assisted safely.',
+        'Family notified. No medical attention required. Follow-up scheduled.',
+      ],
+      cta: 'Download Report',
+    },
+  },
+  {
+    label: 'IHSS Assistant',
+    color: '#e65100',
+    screen: {
+      title: 'IHSS Knowledge Assistant',
+      badge: 'AI',
+      badgeColor: '#e65100',
+      lines: [
+        { label: 'Question', value: 'How do I submit my timesheet?' },
+        { label: 'Source', value: 'CDSS Official Guidance' },
+        { label: 'Confidence', value: 'High' },
+      ],
+      events: [
+        'Log in to etimesheets.ihss.ca.gov using your provider number and PIN.',
+        'Select the pay period, enter your hours, and submit before the deadline.',
+      ],
+      cta: 'Ask Another Question',
+    },
+  },
+  {
+    label: 'Weekly Export',
+    color: '#283593',
+    screen: {
+      title: 'Weekly Summary — Feb 16–22',
+      badge: 'EXPORT',
+      badgeColor: '#283593',
+      lines: [
+        { label: 'Total Hours', value: '38.5 hrs' },
+        { label: 'Shifts', value: '5 shifts' },
+        { label: 'Ready for ESP', value: 'Yes' },
+      ],
+      events: [
+        'Mon–Fri: Full shift records with activity logs and care notes.',
+        'ESP Checklist: All hours verified. Submit by Sunday midnight.',
+      ],
+      cta: 'Download PDF',
+    },
+  },
+];
+
+function DemoSection() {
+  const [active, setActive] = useState(0);
+  const tab = DEMO_TABS[active];
+  return (
+    <Box>
+      {/* Tab buttons */}
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1.5, justifyContent: 'center', mb: 5 }}>
+        {DEMO_TABS.map((t, i) => (
+          <Button
+            key={t.label}
+            onClick={() => setActive(i)}
+            variant={active === i ? 'contained' : 'outlined'}
+            sx={{
+              borderRadius: 3,
+              fontWeight: 700,
+              px: 2.5,
+              py: 1,
+              fontSize: '0.85rem',
+              bgcolor: active === i ? t.color : 'transparent',
+              borderColor: t.color,
+              color: active === i ? 'white' : t.color,
+              '&:hover': { bgcolor: t.color, color: 'white', borderColor: t.color },
+            }}
+          >
+            {t.label}
+          </Button>
+        ))}
+      </Box>
+
+      {/* Demo screen */}
+      <Box
+        sx={{
+          maxWidth: 520,
+          mx: 'auto',
+          borderRadius: 4,
+          overflow: 'hidden',
+          boxShadow: '0 8px 40px rgba(0,0,0,0.13)',
+          border: `2px solid ${tab.color}22`,
+        }}
+      >
+        {/* Phone top bar */}
+        <Box sx={{ bgcolor: tab.color, px: 3, py: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Typography fontWeight={800} color="white" fontSize="1rem">
+            {tab.screen.title}
+          </Typography>
+          <Chip
+            label={tab.screen.badge}
+            size="small"
+            sx={{ bgcolor: tab.screen.badgeColor, color: 'white', fontWeight: 800, fontSize: '0.7rem', height: 22 }}
+          />
+        </Box>
+
+        {/* Content */}
+        <Box sx={{ bgcolor: '#fafafa', px: 3, py: 3 }}>
+          {/* Key/value rows */}
+          <Card elevation={0} sx={{ mb: 2.5, border: '1px solid #e0e0e0', borderRadius: 2 }}>
+            <CardContent sx={{ py: '12px !important', px: 2 }}>
+              {tab.screen.lines.map((l) => (
+                <Box key={l.label} sx={{ display: 'flex', justifyContent: 'space-between', py: 0.5 }}>
+                  <Typography variant="body2" color="text.secondary" fontWeight={600}>{l.label}</Typography>
+                  <Typography variant="body2" fontWeight={700}>{l.value}</Typography>
+                </Box>
+              ))}
+            </CardContent>
+          </Card>
+
+          {/* Event/text lines */}
+          {tab.screen.events.map((e, i) => (
+            <Box key={i} sx={{ display: 'flex', gap: 1.5, mb: 1.5, alignItems: 'flex-start' }}>
+              <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: tab.color, mt: 0.7, flexShrink: 0 }} />
+              <Typography variant="body2" color="text.secondary" lineHeight={1.6}>{e}</Typography>
+            </Box>
+          ))}
+
+          {/* CTA button */}
+          <Button
+            variant="contained"
+            fullWidth
+            sx={{ mt: 3, bgcolor: tab.color, borderRadius: 2.5, fontWeight: 700, py: 1.2, '&:hover': { bgcolor: tab.color, opacity: 0.9 } }}
+          >
+            {tab.screen.cta}
+          </Button>
+        </Box>
+      </Box>
+    </Box>
+  );
+}
+
+// ── Main Page ──────────────────────────────────────────────────────────────────
 const Home = () => {
   const { user } = useAuth();
   const isAuthenticated = !!user;
@@ -297,6 +483,33 @@ const Home = () => {
               </Grid>
             ))}
           </Grid>
+        </Container>
+      </Box>
+
+      {/* INTERACTIVE DEMO */}
+      <Box sx={{ bgcolor: 'white', py: { xs: 8, md: 10 }, px: 2 }}>
+        <Container maxWidth="lg">
+          <Typography
+            variant="h3"
+            textAlign="center"
+            fontWeight={800}
+            mb={2}
+            sx={{ fontSize: { xs: '1.9rem', md: '2.5rem' } }}
+          >
+            See It In Action
+          </Typography>
+          <Typography
+            variant="body1"
+            textAlign="center"
+            color="text.secondary"
+            mb={6}
+            maxWidth={520}
+            mx="auto"
+            fontSize="1.05rem"
+          >
+            Click through the features below to see exactly how IHSS Care Guide works.
+          </Typography>
+          <DemoSection />
         </Container>
       </Box>
 

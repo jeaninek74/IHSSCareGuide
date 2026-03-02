@@ -59,7 +59,7 @@ export default function Privacy() {
           <Typography variant="h6">7. Your Rights</Typography>
           <Typography>
             You have the right to access, correct, or delete your personal data. To exercise these rights,
-            contact us through the App's support channel. We will respond within 30 days.
+            please reach out through the App. We will respond within 30 days.
           </Typography>
 
           <Typography variant="h6">8. Security</Typography>
@@ -80,7 +80,7 @@ export default function Privacy() {
             If you are a California resident, you have the right to know what personal information we collect,
             to request deletion of your personal information, to opt out of the sale of your personal information
             (we do not sell personal information), and to non-discrimination for exercising these rights.
-            To exercise your California privacy rights, contact us at privacy@ihsscareguide.com.
+            To exercise your California privacy rights, please reach out through the App.
           </Typography>
 
           <Typography variant="h6">11. Changes to This Policy</Typography>
