@@ -109,9 +109,9 @@ export default function Incidents() {
       setIncidents((prev) =>
         prev.map((inc) => inc.id === incidentId ? res.data.incident : inc)
       );
-      setSuccess('AI structuring complete.');
+      setSuccess('Report structured successfully.');
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'AI structuring failed. Please try again.');
+      setError(err instanceof Error ? err.message : 'Structuring failed. Please try again.');
     } finally {
       setStructuring(null);
     }
@@ -131,7 +131,7 @@ export default function Incidents() {
       <Container maxWidth="md" sx={{ py: { xs: 2, sm: 4 }, px: { xs: 2, sm: 3 } }}>
         <Typography variant="h4" fontWeight={700} gutterBottom>Incident Reports</Typography>
         <Typography variant="body2" color="text.secondary" mb={3}>
-          Document incidents for your records. Use AI structuring to convert raw notes into a professional incident report.
+          Document incidents for your records. Use Smart Structuring to convert raw notes into a professional incident report.
         </Typography>
 
         {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
@@ -182,7 +182,7 @@ export default function Incidents() {
                         </Typography>
                         {structured && (
                           <Chip
-                            label="AI Structured"
+                            label="Structured"
                             size="small"
                             color="primary"
                             variant="outlined"
@@ -201,7 +201,7 @@ export default function Incidents() {
                           disabled={structuring === incident.id}
                           sx={{ flexShrink: 0, ml: 1 }}
                         >
-                          {structuring === incident.id ? 'Structuring...' : 'AI Structure'}
+                          {structuring === incident.id ? 'Structuring...' : 'Structure Report'}
                         </Button>
                       )}
                     </Stack>
@@ -218,7 +218,7 @@ export default function Incidents() {
                             <Stack direction="row" alignItems="center" justifyContent="space-between" width="100%" pr={1}>
                               <Typography variant="body2" fontWeight={600}>
                                 <AutoAwesomeIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle', color: 'primary.main' }} />
-                                AI Structured Report
+                                Structured Report
                               </Typography>
                               <Stack direction="row" spacing={0.5} onClick={(e) => e.stopPropagation()}>
                                 <Tooltip title={copiedId === incident.id ? 'Copied!' : 'Copy report'}>

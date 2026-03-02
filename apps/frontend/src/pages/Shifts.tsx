@@ -69,7 +69,7 @@ function StructuredNoteView({ note }: { note: StructuredNote }) {
     const win = window.open('', '_blank');
     if (!win) return;
     win.document.write(`<html><head><title>Care Notes</title><style>body{font-family:sans-serif;padding:24px;max-width:700px;margin:auto}h3{margin-bottom:4px}p,li{font-size:14px}ul{margin:4px 0 12px 16px}</style></head><body>`);
-    win.document.write(`<h2>AI-Generated Care Notes</h2>`);
+    win.document.write(`<h2>Care Notes</h2>`);
     for (const [key, val] of Object.entries(out)) {
       const label = key.replace(/([A-Z])/g, ' $1').trim();
       win.document.write(`<h3>${label}</h3>`);
@@ -216,7 +216,7 @@ export default function Shifts() {
     try {
       const res = await notesApi.generate(shiftId);
       setShiftNotes((prev) => ({ ...prev, [shiftId]: res.data.note }));
-      setSuccess('AI notes generated successfully.');
+      setSuccess('Notes generated successfully.');
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Failed to generate notes.');
     } finally {
@@ -375,7 +375,7 @@ export default function Shifts() {
                       onClick={() => handleGenerateNotes(shift.id)}
                       disabled={generatingNotes === shift.id || shift.events.length === 0}
                     >
-                      {generatingNotes === shift.id ? 'Generating...' : shiftNotes[shift.id] ? 'Regenerate' : 'Generate Notes'}
+                      {generatingNotes === shift.id ? 'Generating...' : shiftNotes[shift.id] ? 'Regenerate Notes' : 'Write Notes'}
                     </Button>
                   </Stack>
                 </Stack>
@@ -386,7 +386,7 @@ export default function Shifts() {
                     <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                       <Typography variant="body2" fontWeight={600}>
                         <AutoAwesomeIcon sx={{ fontSize: 14, mr: 0.5, verticalAlign: 'middle', color: 'secondary.main' }} />
-                        AI-Generated Care Notes
+                        Care Notes
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>

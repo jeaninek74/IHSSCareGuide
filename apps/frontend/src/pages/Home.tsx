@@ -64,7 +64,7 @@ const DEMO_TABS = [
         { label: 'Duration', value: '2h 14m' },
       ],
       events: ['Prepared breakfast — oatmeal and juice', 'Assisted with morning medications', 'Personal hygiene assistance'],
-      cta: 'End Shift & Generate Notes',
+      cta: 'End Shift & Save Notes',
     },
   },
   {

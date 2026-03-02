@@ -60,7 +60,7 @@ export default function Onboarding() {
               what this app does and get you ready to log your first shift.
             </Typography>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center', mb: 3 }}>
-              {['Shift Logging', 'AI Notes', 'Weekly Exports', 'Knowledge Assistant', 'Certification Tracker'].map((f) => (
+              {['Shift Logging', 'Smart Notes', 'Weekly Exports', 'Knowledge Assistant', 'Certification Tracker'].map((f) => (
                 <Chip key={f} label={f} color="primary" variant="outlined" size="small" />
               ))}
             </Box>
@@ -80,8 +80,7 @@ export default function Onboarding() {
                 activities as events during the shift.
               </Typography>
               <Typography>
-                <strong>AI-Structured Notes:</strong> After a shift, generate a structured care note
-                from your logged events using AI — ready to reference for documentation.
+                <strong>Structured Notes:</strong> After a shift, your logged events become a structured care note — ready to reference for documentation.
               </Typography>
               <Typography>
                 <strong>Weekly Exports:</strong> Generate a weekly summary of your shifts, formatted
@@ -98,7 +97,7 @@ export default function Onboarding() {
             </Box>
             <Alert severity="info" sx={{ mt: 2 }}>
               <SmartToyIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-              This app uses AI to help organize your documentation. Always review AI outputs before use.
+              This app helps organize your documentation automatically. Always review generated content before use.
             </Alert>
           </Box>
         )}
@@ -188,7 +187,7 @@ export default function Onboarding() {
                 2. <strong>Log care events</strong> — add activities as you provide care
               </Typography>
               <Typography sx={{ mb: 1 }}>
-                3. <strong>End your shift</strong> — generate AI notes when done
+                3. <strong>End your shift</strong> — your notes are written for you
               </Typography>
               <Typography sx={{ mb: 1 }}>
                 4. <strong>Ask the assistant</strong> — get answers to IHSS questions anytime

@@ -6,10 +6,10 @@ import { useNavigate } from 'react-router-dom';
 
 const FEATURES = [
   'Shift tracking with event logging',
-  'AI-generated care notes',
-  'Incident reporting & AI structuring',
+  'Auto-generated care notes',
+  'Incident reporting & smart structuring',
   'Weekly export for ESP submission',
-  'IHSS AI Knowledge Assistant',
+  'IHSS Knowledge Assistant',
   'Certification reminders',
 ];
 
