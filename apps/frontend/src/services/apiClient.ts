@@ -207,3 +207,29 @@ export const exportsApi = {
   getOne: (exportId: string) =>
     request<{ success: boolean; data: { export: WeeklyExport } }>(`/exports/${exportId}`),
 };
+
+// ── Subscriptions ─────────────────────────────────────────────────────────────
+
+export interface SubscriptionStatus {
+  isActive: boolean;
+  status: string | null;
+  priceId: string | null;
+  trialEndsAt: string | null;
+  subscriptionEndsAt: string | null;
+  plan: 'monthly' | 'annual' | null;
+}
+
+export const subscriptionApi = {
+  getStatus: () =>
+    request<{ success: boolean; data: SubscriptionStatus }>('/subscriptions/status'),
+  createCheckout: (priceId: 'monthly' | 'annual') =>
+    request<{ success: boolean; data: { url: string } }>('/subscriptions/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ priceId }),
+    }),
+  openPortal: () =>
+    request<{ success: boolean; data: { url: string } }>('/subscriptions/portal', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    }),
+};

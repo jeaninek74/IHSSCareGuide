@@ -10,11 +10,17 @@ datasource db {
 }
 
 model User {
-  id           String       @id @default(uuid())
-  email        String       @unique
-  passwordHash String       @map("password_hash")
-  createdAt    DateTime     @default(now()) @map("created_at")
-  updatedAt    DateTime     @updatedAt @map("updated_at")
+  id                     String    @id @default(uuid())
+  email                  String    @unique
+  passwordHash           String    @map("password_hash")
+  stripeCustomerId       String?   @unique @map("stripe_customer_id")
+  stripeSubscriptionId   String?   @unique @map("stripe_subscription_id")
+  subscriptionStatus     String?   @map("subscription_status")
+  subscriptionPriceId    String?   @map("subscription_price_id")
+  trialEndsAt            DateTime? @map("trial_ends_at")
+  subscriptionEndsAt     DateTime? @map("subscription_ends_at")
+  createdAt              DateTime  @default(now()) @map("created_at")
+  updatedAt              DateTime  @updatedAt @map("updated_at")
   profile               UserProfile?
   shifts                Shift[]
   incidents             Incident[]

@@ -12,6 +12,7 @@ import { exportsRoutes } from './routes/exports';
 import { knowledgeRoutes } from './routes/knowledge';
 import { certificationRoutes } from './routes/certifications';
 import { trainingGuidanceRoutes } from './routes/trainingGuidance';
+import { subscriptionRoutes } from './routes/subscriptions';
 import { errorHandler } from './middleware/errorHandler';
 import { requestLogger } from './plugins/requestLogger';
 import securityHeaders from './plugins/securityHeaders';
@@ -23,6 +24,8 @@ const APP_ENV = process.env.APP_ENV || 'development';
 
 export const buildApp = async () => {
   const app = Fastify({
+    // Enable raw body for Stripe webhook signature verification
+    bodyLimit: 1048576,
     logger: {
       level: APP_ENV === 'production' ? 'info' : 'debug',
       serializers: {
@@ -94,6 +97,18 @@ export const buildApp = async () => {
   await app.register(knowledgeRoutes, { prefix: '/knowledge' });
   await app.register(certificationRoutes, { prefix: '/certifications' });
   await app.register(trainingGuidanceRoutes, { prefix: '/ai' });
+  await app.register(subscriptionRoutes, { prefix: '/subscriptions' });
+
+  // Store raw body for Stripe webhook verification
+  app.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
+    try {
+      (req as any).rawBody = body;
+      const parsed = JSON.parse(body.toString());
+      done(null, parsed);
+    } catch (err: any) {
+      done(err, undefined);
+    }
+  });
 
   return app;
 };
