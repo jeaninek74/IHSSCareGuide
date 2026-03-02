@@ -75,7 +75,15 @@ export default function Privacy() {
             under 13. If you believe a child has provided us with personal information, please contact us.
           </Typography>
 
-          <Typography variant="h6">10. Changes to This Policy</Typography>
+          <Typography variant="h6">10. California Privacy Rights (CCPA)</Typography>
+          <Typography>
+            If you are a California resident, you have the right to know what personal information we collect,
+            to request deletion of your personal information, to opt out of the sale of your personal information
+            (we do not sell personal information), and to non-discrimination for exercising these rights.
+            To exercise your California privacy rights, contact us at privacy@ihsscareguide.com.
+          </Typography>
+
+          <Typography variant="h6">11. Changes to This Policy</Typography>
           <Typography>
             We may update this Privacy Policy. We will notify you of significant changes by posting a notice
             in the App. Continued use after changes constitutes acceptance.

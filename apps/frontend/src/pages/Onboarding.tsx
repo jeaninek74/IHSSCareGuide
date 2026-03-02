@@ -15,7 +15,7 @@ const steps = ['Welcome', 'About This App', 'Important Disclaimer', 'Your Profil
 export default function Onboarding() {
   const [activeStep, setActiveStep] = useState(0);
   const [county, setCounty] = useState('');
-  const [providerNumber, setProviderNumber] = useState('');
+
   const [acknowledged, setAcknowledged] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -166,15 +166,7 @@ export default function Onboarding() {
               sx={{ mb: 2 }}
               helperText="The county where you provide IHSS care"
             />
-            <TextField
-              label="Provider Number (optional)"
-              placeholder="e.g., 1234567890"
-              fullWidth
-              value={providerNumber}
-              onChange={(e) => setProviderNumber(e.target.value)}
-              sx={{ mb: 2 }}
-              helperText="Your IHSS provider number for reference only — not shared with any official system"
-            />
+
           </Box>
         )}
 

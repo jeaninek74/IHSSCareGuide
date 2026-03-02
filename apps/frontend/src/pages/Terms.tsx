@@ -77,9 +77,15 @@ export default function Terms() {
             acceptance of the revised Terms.
           </Typography>
 
-          <Typography variant="h6">10. Contact</Typography>
+          <Typography variant="h6">10. Governing Law</Typography>
           <Typography>
-            For questions about these Terms, please contact us through the App's support channel.
+            These Terms are governed by the laws of the State of California, without regard to conflict of
+            law principles. Any disputes arising from these Terms shall be resolved in the courts of California.
+          </Typography>
+
+          <Typography variant="h6">11. Contact</Typography>
+          <Typography>
+            For questions about these Terms, please contact us at support@ihsscareguide.com.
           </Typography>
         </Box>
 
