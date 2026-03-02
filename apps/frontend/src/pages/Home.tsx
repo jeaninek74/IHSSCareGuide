@@ -11,9 +11,9 @@ const FEATURES = [
     color: '#1565c0',
   },
   {
-    title: 'AI Writes Your Notes',
+    title: 'Writes Your Notes',
     description:
-      'After every shift, our AI turns your quick logs into a full professional care note — ready to save or share.',
+      'After every shift, your quick logs become a full professional care note — ready to save or share.',
     color: '#6a1b9a',
   },
   {
@@ -25,7 +25,7 @@ const FEATURES = [
   {
     title: 'Report Incidents Fast',
     description:
-      'Describe what happened in plain words. The AI structures it into a proper incident report in seconds.',
+      'Describe what happened in plain words. It structures into a proper incident report in seconds.',
     color: '#c62828',
   },
   {
@@ -45,7 +45,7 @@ const FEATURES = [
 const HOW_IT_WORKS = [
   { step: '1', text: 'Create an account in 30 seconds.' },
   { step: '2', text: 'Start a shift and log what you do as you care.' },
-  { step: '3', text: 'End the shift — the AI writes your notes for you.' },
+  { step: '3', text: 'End the shift — your notes are written for you.' },
   { step: '4', text: 'Export your weekly report whenever you need it.' },
 ];
 
@@ -68,11 +68,11 @@ const DEMO_TABS = [
     },
   },
   {
-    label: 'AI Care Notes',
+    label: 'Care Notes',
     color: '#6a1b9a',
     screen: {
-      title: 'AI-Generated Care Note',
-      badge: 'AI',
+      title: 'Care Note',
+      badge: 'GENERATED',
       badgeColor: '#6a1b9a',
       lines: [
         { label: 'Date', value: 'Feb 19, 2026' },
@@ -90,7 +90,7 @@ const DEMO_TABS = [
     label: 'Incident Reports',
     color: '#c62828',
     screen: {
-      title: 'AI Structured Report',
+      title: 'Structured Report',
       badge: 'STRUCTURED',
       badgeColor: '#c62828',
       lines: [
@@ -110,7 +110,7 @@ const DEMO_TABS = [
     color: '#e65100',
     screen: {
       title: 'IHSS Knowledge Assistant',
-      badge: 'AI',
+      badge: 'OFFICIAL SOURCES',
       badgeColor: '#e65100',
       lines: [
         { label: 'Question', value: 'How do I submit my timesheet?' },
@@ -388,6 +388,33 @@ const Home = () => {
         </Container>
       </Box>
 
+      {/* INTERACTIVE DEMO — placed right after "What does it do?" */}
+      <Box sx={{ bgcolor: 'white', py: { xs: 8, md: 10 }, px: 2 }}>
+        <Container maxWidth="lg">
+          <Typography
+            variant="h3"
+            textAlign="center"
+            fontWeight={800}
+            mb={2}
+            sx={{ fontSize: { xs: '1.9rem', md: '2.5rem' } }}
+          >
+            See It In Action
+          </Typography>
+          <Typography
+            variant="body1"
+            textAlign="center"
+            color="text.secondary"
+            mb={6}
+            maxWidth={520}
+            mx="auto"
+            fontSize="1.05rem"
+          >
+            Click through the features below to see exactly how IHSS Care Guide works.
+          </Typography>
+          <DemoSection />
+        </Container>
+      </Box>
+
       {/* HOW IT WORKS */}
       <Box sx={{ bgcolor: '#1976d2', color: 'white', py: { xs: 8, md: 10 }, px: 2 }}>
         <Container maxWidth="md">
@@ -465,7 +492,7 @@ const Home = () => {
         <Container maxWidth="md">
           <Grid container spacing={4} textAlign="center">
             {[
-              { stat: 'AI-Powered', label: 'Notes written in seconds, not minutes.' },
+              { stat: 'Built for IHSS', label: 'Designed specifically for California IHSS caregivers.' },
               { stat: 'IHSS-Specific', label: 'Built for California IHSS caregivers.' },
               { stat: 'Easy to Use', label: 'No training required. Start in under a minute.' },
             ].map((item) => (
@@ -483,33 +510,6 @@ const Home = () => {
               </Grid>
             ))}
           </Grid>
-        </Container>
-      </Box>
-
-      {/* INTERACTIVE DEMO */}
-      <Box sx={{ bgcolor: 'white', py: { xs: 8, md: 10 }, px: 2 }}>
-        <Container maxWidth="lg">
-          <Typography
-            variant="h3"
-            textAlign="center"
-            fontWeight={800}
-            mb={2}
-            sx={{ fontSize: { xs: '1.9rem', md: '2.5rem' } }}
-          >
-            See It In Action
-          </Typography>
-          <Typography
-            variant="body1"
-            textAlign="center"
-            color="text.secondary"
-            mb={6}
-            maxWidth={520}
-            mx="auto"
-            fontSize="1.05rem"
-          >
-            Click through the features below to see exactly how IHSS Care Guide works.
-          </Typography>
-          <DemoSection />
         </Container>
       </Box>
 
@@ -563,7 +563,7 @@ const Home = () => {
                   per month
                 </Typography>
                 <Stack spacing={1.5} mb={4} width="100%" alignItems="flex-start">
-                  {['Full access to all features', 'AI-generated care notes', 'Incident reporting', 'Weekly exports', 'Certification reminders', 'IHSS AI Assistant'].map(f => (
+                  {['Full access to all features', 'Auto-generated care notes', 'Incident reporting', 'Weekly exports', 'Certification reminders', 'IHSS Knowledge Assistant'].map(f => (
                     <Box key={f} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: '#1976d2', flexShrink: 0 }} />
                       <Typography variant="body2" color="text.secondary">{f}</Typography>
@@ -626,7 +626,7 @@ const Home = () => {
                   per year — only $7.08/mo
                 </Typography>
                 <Stack spacing={1.5} mb={4} width="100%" alignItems="flex-start">
-                  {['Full access to all features', 'AI-generated care notes', 'Incident reporting', 'Weekly exports', 'Certification reminders', 'IHSS AI Assistant'].map(f => (
+                  {['Full access to all features', 'Auto-generated care notes', 'Incident reporting', 'Weekly exports', 'Certification reminders', 'IHSS Knowledge Assistant'].map(f => (
                     <Box key={f} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.8)', flexShrink: 0 }} />
                       <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.9)' }}>{f}</Typography>
