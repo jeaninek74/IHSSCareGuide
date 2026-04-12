@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../utils/prisma';
 import { authMiddleware } from '../middleware/auth';
 import { moderateContent, generateStructuredJSON, AI_MODEL } from '../utils/aiService';
@@ -75,7 +76,7 @@ export const notesRoutes = async (app: FastifyInstance) => {
 
       // Build the events text for the prompt
       const eventsText = shift.events
-        .map((e, i) => `${i + 1}. [${e.type}] ${e.description || 'No description'} (${new Date(e.createdAt).toLocaleTimeString()})`)
+        .map((e: { type: string; description: string; createdAt: Date }, i: number) => `${i + 1}. [${e.type}] ${e.description || 'No description'} (${new Date(e.createdAt).toLocaleTimeString()})`)
         .join('\n');
 
       // Moderate the events content
@@ -116,7 +117,7 @@ export const notesRoutes = async (app: FastifyInstance) => {
           userId: userId!,
           promptVersion: careLogStructuringPrompt.version,
           modelUsed: AI_MODEL,
-          content: structuredData as object as import('@prisma/client').Prisma.InputJsonValue,
+          content: structuredData as object,
           isFinal: false,
         },
       });

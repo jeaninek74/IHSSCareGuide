@@ -84,12 +84,12 @@ export const exportsRoutes = async (app: FastifyInstance) => {
 
       // Build shifts data for the prompt
       const shiftsData = shifts
-        .map((shift) => {
+        .map((shift: { id: string; startedAt: Date; endedAt: Date | null; events: { type: string; description: string }[] }) => {
           const hours = shift.endedAt
             ? ((new Date(shift.endedAt).getTime() - new Date(shift.startedAt).getTime()) / 3600000).toFixed(2)
             : '0';
           const events = shift.events
-            .map((e) => `  - [${e.type}] ${e.description || 'No description'}`)
+            .map((e: { type: string; description: string }) => `  - [${e.type}] ${e.description || 'No description'}`)
             .join('\n');
           return `Shift ${shift.id}:
   Date: ${new Date(shift.startedAt).toLocaleDateString()}
@@ -170,7 +170,7 @@ ${events || '  (no events logged)'}`;
       return reply.code(200).send({
         success: true,
         data: {
-          exports: exports.map((e) => ({
+          exports: exports.map((e: { id: string; weekStart: Date; weekEnd: Date; content: unknown; createdAt: Date }) => ({
             id: e.id,
             weekStart: e.weekStart.toISOString(),
             weekEnd: e.weekEnd.toISOString(),

@@ -12,9 +12,7 @@ import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NavBar from '../components/NavBar';
-import { shiftsApi, incidentsApi } from '../services/apiClient';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+import { shiftsApi, incidentsApi, certificationsApi } from '../services/apiClient';
 
 interface DashboardStats {
   activeShift: boolean;
@@ -38,14 +36,12 @@ export default function Dashboard() {
         const [activeRes, incRes, certRes] = await Promise.allSettled([
           shiftsApi.getActive(),
           incidentsApi.getAll(),
-          fetch(`${API_BASE}/certifications?status=expiring_soon`, { credentials: 'include' }).then((r) => r.json()),
+          certificationsApi.getAll('expiring_soon'),
         ]);
 
         const activeShiftData = activeRes.status === 'fulfilled' ? activeRes.value.data.shift : null;
         const incidents = incRes.status === 'fulfilled' ? incRes.value.data.incidents : [];
-        const certs = certRes.status === 'fulfilled' && certRes.value?.data?.certifications
-          ? certRes.value.data.certifications
-          : [];
+        const certs = certRes.status === 'fulfilled' ? certRes.value.data.certifications : [];
 
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);

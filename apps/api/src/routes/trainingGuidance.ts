@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../utils/prisma';
 import { authMiddleware } from '../middleware/auth';
 import { generateEmbedding, generateStructuredJSON } from '../utils/aiService';
@@ -108,23 +109,25 @@ export const trainingGuidanceRoutes = async (app: FastifyInstance) => {
       const embedding = await generateEmbedding(queryText);
       const vectorLiteral = `'[${embedding.join(',')}]'::vector`;
 
-      const chunks = await prisma.$transaction(async (tx) => {
+      interface GuidanceChunk {
+        id: string;
+        title: string;
+        source: string;
+        content: string;
+        similarity: number;
+      }
+
+      const chunks = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         await tx.$executeRawUnsafe(`SET LOCAL enable_indexscan = off`);
         await tx.$executeRawUnsafe(`SET LOCAL enable_bitmapscan = off`);
-        return tx.$queryRawUnsafe<Array<{
-          id: string;
-          title: string;
-          source: string;
-          content: string;
-          similarity: number;
-        }>>(
+        return tx.$queryRawUnsafe(
           `SELECT kc.id, kc.title, kc.source, kc.content,
                   1 - (kc.embedding <=> ${vectorLiteral}) AS similarity
            FROM knowledge_chunks kc
            WHERE kc.embedding IS NOT NULL
            ORDER BY kc.embedding <=> ${vectorLiteral}
            LIMIT 5`
-        );
+        ) as Promise<GuidanceChunk[]>;
       });
 
       if (chunks.length === 0) {
@@ -145,7 +148,7 @@ export const trainingGuidanceRoutes = async (app: FastifyInstance) => {
 
       // Build context
       const retrievedChunks = chunks
-        .map((c, i) => `[${i + 1}] Source: ${c.source}\nTitle: ${c.title}\nContent: ${c.content}`)
+        .map((c: GuidanceChunk, i: number) => `[${i + 1}] Source: ${c.source}\nTitle: ${c.title}\nContent: ${c.content}`)
         .join('\n\n---\n\n');
 
       const prompt = TRAINING_GUIDANCE_PROMPT.build({ certificationName, county, question, retrievedChunks });

@@ -18,7 +18,7 @@ export async function moderateContent(input: string): Promise<boolean> {
     return result.results[0]?.flagged ?? false;
   } catch (err) {
     console.error('Moderation check failed:', err);
-    return false; // Fail open — do not block on moderation error
+    return true; // Fail closed — block content when moderation is unavailable
   }
 }
 
