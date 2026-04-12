@@ -232,4 +232,32 @@ export const subscriptionRoutes = async (app: FastifyInstance) => {
       return reply.send({ received: true });
     }
   );
+
+  /**
+   * POST /subscriptions/admin/activate-test
+   * Admin-only: activate a trialing subscription for a test user by email.
+   * Protected by x-admin-secret header.
+   */
+  app.post(
+    '/admin/activate-test',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const adminSecret = request.headers['x-admin-secret'];
+      if (!adminSecret || adminSecret !== process.env.ADMIN_SECRET) {
+        return reply.status(403).send({ success: false, error: { code: 'FORBIDDEN' } });
+      }
+      const { email } = request.body as { email: string };
+      if (!email) {
+        return reply.status(400).send({ success: false, error: { code: 'MISSING_EMAIL' } });
+      }
+      const user = await prisma.user.update({
+        where: { email },
+        data: {
+          subscriptionStatus: 'trialing',
+          trialEndsAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+        select: { id: true, email: true, subscriptionStatus: true, trialEndsAt: true },
+      });
+      return reply.send({ success: true, data: { user } });
+    }
+  );
 };
