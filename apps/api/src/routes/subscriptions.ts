@@ -157,12 +157,13 @@ export const subscriptionRoutes = async (app: FastifyInstance) => {
       let event: Stripe.Event;
       try {
         event = stripe.webhooks.constructEvent(
-          (request as any).rawBody,
+          (request as unknown as Record<string, unknown>).rawBody as string | Buffer,
           sig,
           webhookSecret
         );
-      } catch (err: any) {
-        console.error('Webhook signature verification failed:', err.message);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        request.log.error({ err: message }, 'Webhook signature verification failed');
         return reply.code(400).send({ error: 'Invalid webhook signature' });
       }
 
@@ -180,7 +181,7 @@ export const subscriptionRoutes = async (app: FastifyInstance) => {
                 subscriptionStatus: sub.status,
                 subscriptionPriceId: sub.items.data[0]?.price.id ?? null,
                 trialEndsAt: sub.trial_end ? new Date(sub.trial_end * 1000) : null,
-                subscriptionEndsAt: (sub as any).current_period_end ? new Date((sub as any).current_period_end * 1000) : null,
+                subscriptionEndsAt: sub.items.data[0]?.current_period_end ? new Date(sub.items.data[0].current_period_end * 1000) : null,
               },
             });
           }
@@ -194,7 +195,7 @@ export const subscriptionRoutes = async (app: FastifyInstance) => {
               where: { id: userId },
               data: {
                 subscriptionStatus: 'canceled',
-                    subscriptionEndsAt: (sub as any).current_period_end ? new Date((sub as any).current_period_end * 1000) : null,
+                subscriptionEndsAt: sub.items.data[0]?.current_period_end ? new Date(sub.items.data[0].current_period_end * 1000) : null,
               },
             });
           }
@@ -216,7 +217,7 @@ export const subscriptionRoutes = async (app: FastifyInstance) => {
                   subscriptionStatus: fullSub.status,
                   subscriptionPriceId: fullSub.items.data[0]?.price.id ?? null,
                   trialEndsAt: fullSub.trial_end ? new Date(fullSub.trial_end * 1000) : null,
-                  subscriptionEndsAt: (fullSub as any).current_period_end ? new Date((fullSub as any).current_period_end * 1000) : null,
+                  subscriptionEndsAt: fullSub.items.data[0]?.current_period_end ? new Date(fullSub.items.data[0].current_period_end * 1000) : null,
                 },
               });
             }

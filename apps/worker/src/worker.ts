@@ -112,7 +112,7 @@ async function processReminders(): Promise<void> {
         data: { sentAt: now, status: 'sent' },
       });
 
-      logger.info({ eventId: event.id, toEmail: providerEmail, certName }, 'Reminder sent successfully');
+      logger.info({ eventId: event.id, certName }, 'Reminder sent successfully');
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       logger.error({ eventId: event.id, err: message }, 'Failed to send reminder');

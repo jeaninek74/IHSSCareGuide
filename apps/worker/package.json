@@ -11,13 +11,11 @@
   "dependencies": {
     "@prisma/client": "^5.8.0",
     "@sendgrid/mail": "^8.1.6",
-    "nodemailer": "^6.9.8",
     "openai": "^4.26.0",
     "pino": "^8.17.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
-    "@types/nodemailer": "^6.4.14",
     "prisma": "^5.8.0",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3"

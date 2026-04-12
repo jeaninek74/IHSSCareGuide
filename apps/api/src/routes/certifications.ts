@@ -25,10 +25,10 @@ async function createDefaultReminderEvents(certId: string, providerId: string, e
   });
 
   const daysBefore = rules.length > 0
-    ? rules.map((r) => r.daysBeforeExpiration)
+    ? rules.map((r: { daysBeforeExpiration: number }) => r.daysBeforeExpiration)
     : [30, 7, 1];
 
-  const events = daysBefore.map((days) => {
+  const events = daysBefore.map((days: number) => {
     const scheduledFor = new Date(expirationDate);
     scheduledFor.setDate(scheduledFor.getDate() - days);
     return {
@@ -40,7 +40,7 @@ async function createDefaultReminderEvents(certId: string, providerId: string, e
   });
 
   // Only create future events
-  const futureEvents = events.filter((e) => e.scheduledFor > new Date());
+  const futureEvents = events.filter((e: { scheduledFor: Date }) => e.scheduledFor > new Date());
   if (futureEvents.length > 0) {
     await prisma.reminderEvent.createMany({ data: futureEvents });
   }
@@ -153,14 +153,15 @@ export const certificationRoutes = async (app: FastifyInstance) => {
       const certs = await prisma.providerCertification.findMany({
         where: {
           providerId: userId,
-          ...(status ? { status: status as any } : {}),
+          ...(status ? { status: status as 'active' | 'expired' | 'expiring_soon' | 'missing' } : {}),
         },
         include: { certificationType: true, _count: { select: { reminderEvents: true } } },
         orderBy: [{ expirationDate: 'asc' }, { createdAt: 'desc' }],
       });
 
       // Recompute status dynamically
-      const updated = certs.map((c) => ({
+      type CertWithStatus = typeof certs[number] & { status: ReturnType<typeof computeStatus> };
+      const updated: CertWithStatus[] = certs.map((c: typeof certs[number]) => ({
         ...c,
         status: computeStatus(c.expirationDate),
       }));
@@ -168,10 +169,10 @@ export const certificationRoutes = async (app: FastifyInstance) => {
       // Summary counts
       const summary = {
         total: updated.length,
-        active: updated.filter((c) => c.status === 'active').length,
-        expiringSoon: updated.filter((c) => c.status === 'expiring_soon').length,
-        expired: updated.filter((c) => c.status === 'expired').length,
-        missing: updated.filter((c) => c.status === 'missing').length,
+        active: updated.filter((c: CertWithStatus) => c.status === 'active').length,
+        expiringSoon: updated.filter((c: CertWithStatus) => c.status === 'expiring_soon').length,
+        expired: updated.filter((c: CertWithStatus) => c.status === 'expired').length,
+        missing: updated.filter((c: CertWithStatus) => c.status === 'missing').length,
       };
 
       return reply.code(200).send({ success: true, data: { certifications: updated, summary } });

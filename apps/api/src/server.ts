@@ -87,6 +87,17 @@ export const buildApp = async () => {
   // Error handler
   app.setErrorHandler(errorHandler);
 
+  // Store raw body for Stripe webhook verification — must be registered before routes
+  app.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
+    try {
+      (req as unknown as Record<string, unknown>).rawBody = body;
+      const parsed = JSON.parse(body.toString());
+      done(null, parsed);
+    } catch (err) {
+      done(err as Error, undefined);
+    }
+  });
+
   // Routes
   await app.register(healthRoutes, { prefix: '/health' });
   await app.register(authRoutes, { prefix: '/auth' });
@@ -98,17 +109,6 @@ export const buildApp = async () => {
   await app.register(certificationRoutes, { prefix: '/certifications' });
   await app.register(trainingGuidanceRoutes, { prefix: '/ai' });
   await app.register(subscriptionRoutes, { prefix: '/subscriptions' });
-
-  // Store raw body for Stripe webhook verification
-  app.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req, body, done) => {
-    try {
-      (req as any).rawBody = body;
-      const parsed = JSON.parse(body.toString());
-      done(null, parsed);
-    } catch (err: any) {
-      done(err, undefined);
-    }
-  });
 
   return app;
 };

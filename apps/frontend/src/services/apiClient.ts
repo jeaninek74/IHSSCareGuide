@@ -208,6 +208,29 @@ export const exportsApi = {
     request<{ success: boolean; data: { export: WeeklyExport } }>(`/exports/${exportId}`),
 };
 
+// ── Certifications ────────────────────────────────────────────────────────────
+
+export interface Certification {
+  id: string;
+  providerId: string;
+  certificationTypeId: string | null;
+  customName: string | null;
+  issuedDate: string | null;
+  expirationDate: string | null;
+  status: string;
+  documentUrl: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const certificationsApi = {
+  getAll: (status?: string) =>
+    request<{ success: boolean; data: { certifications: Certification[] } }>(
+      status ? `/certifications?status=${status}` : '/certifications'
+    ),
+};
+
 // ── Subscriptions ─────────────────────────────────────────────────────────────
 
 export interface SubscriptionStatus {

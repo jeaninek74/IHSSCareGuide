@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../utils/prisma';
 import { authMiddleware } from '../middleware/auth';
 import { generateEmbedding, generateStructuredJSON } from '../utils/aiService';
@@ -47,25 +48,27 @@ async function searchSimilarChunks(embedding: number[], limit = 5) {
 
   // Run inside a transaction so SET applies to the SELECT.
   // Disabling index scans forces a sequential scan which works with any row count.
-  const results = await prisma.$transaction(async (tx) => {
+  interface ChunkResult {
+    id: string;
+    document_id: string;
+    title: string;
+    source: string;
+    content: string;
+    chunk_index: number;
+    similarity: number;
+  }
+
+  const results = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.$executeRawUnsafe(`SET LOCAL enable_indexscan = off`);
     await tx.$executeRawUnsafe(`SET LOCAL enable_bitmapscan = off`);
-    return tx.$queryRawUnsafe<Array<{
-      id: string;
-      document_id: string;
-      title: string;
-      source: string;
-      content: string;
-      chunk_index: number;
-      similarity: number;
-    }>>(
+    return tx.$queryRawUnsafe(
       `SELECT kc.id, kc.document_id, kc.title, kc.source, kc.content, kc.chunk_index,
               1 - (kc.embedding <=> ${vectorLiteral}) AS similarity
        FROM knowledge_chunks kc
        WHERE kc.embedding IS NOT NULL
        ORDER BY kc.embedding <=> ${vectorLiteral}
        LIMIT ${limit}`
-    );
+    ) as Promise<ChunkResult[]>;
   });
   return results;
 }
@@ -133,7 +136,7 @@ export const knowledgeRoutes = async (app: FastifyInstance) => {
 
       // 3. Build retrieved chunks text
       const retrievedChunks = chunks
-        .map((c, i) => `[${i + 1}] Source: ${c.source}\nTitle: ${c.title}\nContent: ${c.content}`)
+        .map((c: { source: string; title: string; content: string }, i: number) => `[${i + 1}] Source: ${c.source}\nTitle: ${c.title}\nContent: ${c.content}`)
         .join('\n\n---\n\n');
 
       // 4. Generate grounded answer
@@ -247,7 +250,7 @@ export const knowledgeRoutes = async (app: FastifyInstance) => {
       return reply.code(200).send({
         success: true,
         data: {
-          documents: docs.map((d) => ({
+          documents: docs.map((d: typeof docs[number]) => ({
             id: d.id,
             title: d.title,
             source: d.source,

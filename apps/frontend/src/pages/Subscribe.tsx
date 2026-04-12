@@ -25,8 +25,9 @@ const Subscribe = () => {
     try {
       const res = await subscriptionApi.createCheckout(plan);
       window.location.href = res.data.url;
-    } catch (err: any) {
-      setError(err.message || 'Failed to start checkout. Please try again.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to start checkout. Please try again.';
+      setError(message);
       setLoading(null);
     }
   };
