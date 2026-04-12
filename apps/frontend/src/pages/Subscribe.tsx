@@ -38,8 +38,9 @@ const Subscribe = () => {
     try {
       const res = await subscriptionApi.openPortal();
       window.location.href = res.data.url;
-    } catch (err: any) {
-      setError(err.message || 'Failed to open billing portal.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to open billing portal.';
+      setError(message);
       setLoading(null);
     }
   };

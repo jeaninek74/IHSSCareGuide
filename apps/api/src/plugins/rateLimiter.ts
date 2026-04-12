@@ -1,5 +1,5 @@
 import fp from 'fastify-plugin';
-import type { FastifyInstance } from 'fastify';
+import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 
 // In-memory rate limiter (per IP, per route prefix)
 // For production scale, replace with Redis-backed store
@@ -58,8 +58,8 @@ export const RATE_LIMITS = {
 };
 
 export async function rateLimitMiddleware(
-  request: any,
-  reply: any,
+  request: FastifyRequest,
+  reply: FastifyReply,
   opts: RateLimitOptions
 ): Promise<boolean> {
   const ip = request.ip || request.headers['x-forwarded-for'] || '127.0.0.1';
